@@ -64,12 +64,12 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				care: {
-					primary: '#4DB6AC',    // Teal - primary brand color
-					secondary: '#81D4FA',  // Light blue - secondary color
-					accent: '#FFB74D',     // Warm orange - accent color
-					light: '#E0F7FA',      // Very light blue - background color
-					dark: '#00796B',       // Dark teal - for text or contrast
-					gray: '#F5F7F9',       // Light gray - for backgrounds
+					primary: '#2A7DE1',    // Main primary blue color
+					secondary: '#4BC0C0',  // Secondary teal color
+					accent: '#FFA726',     // Warm orange accent color
+					light: '#F5F9FF',      // Very light blue background color
+					dark: '#1A4E8E',       // Dark blue for text or contrast
+					gray: '#F5F7F9',       // Light gray for backgrounds
 					border: '#E0E6ED'      // Border color
 				}
 			},
