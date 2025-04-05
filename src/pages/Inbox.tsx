@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { 
   Plus, 
@@ -69,10 +69,10 @@ const Inbox = () => {
         setReplyToEmail(null);
       } else {
         // For new emails
-        const newEmail = {
+        const newEmail: Email = {
           ...email,
           id: `email-${Date.now()}`,
-          folder: "sent",
+          folder: "sent" as EmailFolder,
           read: true,
           date: new Date().toISOString()
         };
@@ -92,7 +92,7 @@ const Inbox = () => {
   const handleDeleteEmail = (emailId: string) => {
     const updatedEmails = emails.map(email => {
       if (email.id === emailId) {
-        return { ...email, folder: "trash" };
+        return { ...email, folder: "trash" as EmailFolder };
       }
       return email;
     });
@@ -109,7 +109,7 @@ const Inbox = () => {
   const handleArchiveEmail = (emailId: string) => {
     const updatedEmails = emails.map(email => {
       if (email.id === emailId) {
-        return { ...email, folder: "archive" };
+        return { ...email, folder: "archive" as EmailFolder };
       }
       return email;
     });

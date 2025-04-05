@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -86,7 +85,6 @@ const Index = () => {
                     type="text" 
                     placeholder="Search doctors, services, etc." 
                     className="w-full" 
-                    prefix={<Search className="h-4 w-4 text-gray-400" />}
                   />
                 </div>
                 <Button className="bg-care-primary hover:bg-care-dark">
