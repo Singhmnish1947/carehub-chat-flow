@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PaperPlane, Paperclip, Smile } from "lucide-react";
+import { Send, Paperclip, Smile } from "lucide-react";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -63,7 +63,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
           className="bg-care-primary hover:bg-care-dark text-white"
           disabled={disabled || message.trim() === ""}
         >
-          <PaperPlane size={20} />
+          <Send size={20} />
           <span className="sr-only">Send message</span>
         </Button>
       </div>
