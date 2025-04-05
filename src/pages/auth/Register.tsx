@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Facebook, Loader2 } from "lucide-react";
-import { FcGoogle } from 'lucide-react';
+import { Facebook, Loader2, Mail } from "lucide-react";
 
 const Register = () => {
   const { toast } = useToast();
@@ -185,7 +183,7 @@ const Register = () => {
                 disabled={isLoading}
                 className="w-full"
               >
-                <FcGoogle className="mr-2 h-4 w-4" />
+                <Mail className="mr-2 h-4 w-4" />
                 Google
               </Button>
               <Button

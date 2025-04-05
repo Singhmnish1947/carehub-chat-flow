@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   CalendarCheck, 
@@ -13,6 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface StatCardProps {
   title: string;
