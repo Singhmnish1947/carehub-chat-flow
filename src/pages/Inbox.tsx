@@ -1,567 +1,311 @@
 
 import React, { useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
 import { 
-  Search, 
-  Mail, 
-  Send, 
   Plus, 
-  Trash, 
+  Search, 
+  Inbox as InboxIcon, 
+  Send, 
   Archive, 
-  Star, 
-  Inbox as InboxIcon,
-  AlertCircle,
+  Trash2, 
+  Star,
   Loader2
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import EmailList from "@/components/inbox/EmailList";
+import EmailView from "@/components/inbox/EmailView";
+import ComposeDialog from "@/components/inbox/ComposeDialog";
+import { Email, EmailFolder } from "@/types/email";
 import { useToast } from "@/hooks/use-toast";
-
-interface Email {
-  id: number;
-  subject: string;
-  sender: {
-    name: string;
-    email: string;
-    avatar: string;
-    initials: string;
-  };
-  content: string;
-  date: string;
-  isRead: boolean;
-  folder: 'inbox' | 'sent' | 'drafts' | 'archived';
-  isStarred: boolean;
-}
+import { emailData } from "@/data/emailData";
 
 const Inbox = () => {
   const { toast } = useToast();
-  const [emails, setEmails] = useState<Email[]>([
-    {
-      id: 1,
-      subject: "Monthly Department Meeting",
-      sender: {
-        name: "Dr. Vikram Sharma",
-        email: "vikram.s@havenmed.com",
-        avatar: "/placeholder.svg",
-        initials: "VS"
-      },
-      content: `
-        Dear Team,
-
-        This is a reminder that our monthly department meeting is scheduled for tomorrow at 10:00 AM in the conference room. We'll be discussing the following agenda items:
-        
-        1. Review of last month's performance
-        2. Upcoming changes to patient care protocols
-        3. Staff scheduling for the holiday season
-        4. Equipment procurement updates
-        
-        Please come prepared with your updates and questions. If you cannot attend, kindly let me know in advance.
-        
-        Best regards,
-        Dr. Vikram Sharma
-        Head of Cardiology
-      `,
-      date: "Today, 9:45 AM",
-      isRead: false,
-      folder: "inbox",
-      isStarred: false
-    },
-    {
-      id: 2,
-      subject: "New Patient Referral",
-      sender: {
-        name: "Dr. Priya Patel",
-        email: "priya.p@havenmed.com",
-        avatar: "/placeholder.svg",
-        initials: "PP"
-      },
-      content: `
-        Hi Dr. John,
-
-        I'm referring a new patient, Mr. Rajesh Kumar, to you. He's been experiencing recurring chest pain and shortness of breath. His initial ECG shows some abnormalities that I believe warrant further investigation.
-        
-        I've attached his medical records and test results for your review. He's available for an appointment any day next week.
-        
-        Thanks,
-        Dr. Priya Patel
-        General Medicine
-      `,
-      date: "Yesterday, 3:20 PM",
-      isRead: true,
-      folder: "inbox",
-      isStarred: true
-    },
-    {
-      id: 3,
-      subject: "Hospital Budget Review",
-      sender: {
-        name: "Anil Kapoor",
-        email: "anil.k@havenmed.com",
-        avatar: "/placeholder.svg",
-        initials: "AK"
-      },
-      content: `
-        Dear Department Heads,
-
-        We need to review the Q3 budget allocations for all departments. There have been some adjustments based on the hospital board's recent decisions.
-        
-        Please submit your revised budget requirements by the end of this week. The finance team will schedule individual meetings with each department next week.
-        
-        Regards,
-        Anil Kapoor
-        Chief Financial Officer
-      `,
-      date: "Sep 10, 11:00 AM",
-      isRead: true,
-      folder: "inbox",
-      isStarred: false
-    },
-    {
-      id: 4,
-      subject: "Patient Treatment Plan",
-      sender: {
-        name: "Dr. John Doe",
-        email: "john.doe@havenmed.com",
-        avatar: "/placeholder.svg",
-        initials: "JD"
-      },
-      content: `
-        Dear Nursing Team,
-
-        Here's the updated treatment plan for Mrs. Sharma in room 305. Please ensure the following:
-        
-        1. Administer antibiotics as per the new schedule
-        2. Monitor vitals every 4 hours
-        3. Assist with physical therapy exercises twice daily
-        4. Update the patient chart after each interaction
-        
-        Let me know if you notice any adverse reactions or concerns.
-        
-        Thank you,
-        Dr. John Doe
-      `,
-      date: "Sep 8, 2:15 PM",
-      isRead: true,
-      folder: "sent",
-      isStarred: false
-    },
-    {
-      id: 5,
-      subject: "Medical Equipment Order",
-      sender: {
-        name: "Dr. John Doe",
-        email: "john.doe@havenmed.com",
-        avatar: "/placeholder.svg",
-        initials: "JD"
-      },
-      content: `
-        To Procurement Team,
-
-        We need to order the following equipment for the cardiology department:
-        
-        - 2x Portable ECG machines (Philips HeartStart model)
-        - 5x Blood pressure monitors
-        - 1x Portable ultrasound device
-        
-        Please let me know the estimated delivery timeframe and budget impact.
-        
-        Regards,
-        Dr. John Doe
-      `,
-      date: "Aug 25, 10:30 AM",
-      isRead: true,
-      folder: "archived",
-      isStarred: false
-    }
-  ]);
-  
-  const [activeFolder, setActiveFolder] = useState<'inbox' | 'sent' | 'drafts' | 'archived'>('inbox');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [emails, setEmails] = useState<Email[]>(emailData);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
-  
-  // Compose email state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentFolder, setCurrentFolder] = useState<EmailFolder>("inbox");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
-  const [newEmail, setNewEmail] = useState({
-    to: '',
-    subject: '',
-    content: ''
-  });
-  const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [replyToEmail, setReplyToEmail] = useState<Email | null>(null);
 
+  // Filter emails based on search and current folder
   const filteredEmails = emails.filter(email => {
-    // Filter by folder
-    if (email.folder !== activeFolder) return false;
+    const matchesSearch = !searchQuery || 
+      email.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      email.from.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      email.body.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        email.subject.toLowerCase().includes(query) ||
-        email.sender.name.toLowerCase().includes(query) ||
-        email.content.toLowerCase().includes(query)
-      );
-    }
+    const matchesFolder = email.folder === currentFolder;
     
-    return true;
+    return matchesSearch && matchesFolder;
   });
 
-  const handleEmailClick = (email: Email) => {
-    // Mark as read when opened
-    if (!email.isRead) {
-      setEmails(emails.map(e => 
-        e.id === email.id ? { ...e, isRead: true } : e
-      ));
-    }
-    setSelectedEmail(email);
-  };
-
-  const handleStarEmail = (id: number) => {
-    setEmails(emails.map(email => 
-      email.id === id ? { ...email, isStarred: !email.isStarred } : email
-    ));
-  };
-
-  const handleDeleteEmail = (id: number) => {
-    setEmails(emails.filter(email => email.id !== id));
-    if (selectedEmail && selectedEmail.id === id) {
-      setSelectedEmail(null);
-    }
-    toast({
-      title: "Email deleted",
-      description: "The email has been moved to trash.",
-    });
-  };
-
-  const handleArchiveEmail = (id: number) => {
-    setEmails(emails.map(email => 
-      email.id === id ? { ...email, folder: 'archived' } : email
-    ));
-    if (selectedEmail && selectedEmail.id === id) {
-      setSelectedEmail(null);
-    }
-    toast({
-      title: "Email archived",
-      description: "The email has been archived.",
-    });
-  };
-
-  const handleSendEmail = () => {
-    if (!newEmail.to || !newEmail.subject) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleSendEmail = (email: Email) => {
+    setIsLoading(true);
     
-    setIsSending(true);
-    
-    // Simulate sending delay
+    // Simulate sending email
     setTimeout(() => {
-      const sentEmail: Email = {
-        id: Date.now(),
-        subject: newEmail.subject,
-        sender: {
-          name: "Dr. John Doe",
-          email: "john.doe@havenmed.com",
-          avatar: "/placeholder.svg",
-          initials: "JD"
-        },
-        content: newEmail.content,
-        date: "Just now",
-        isRead: true,
-        folder: "sent",
-        isStarred: false
-      };
+      if (replyToEmail) {
+        // For replies, add to existing thread
+        const updatedEmails = emails.map(e => {
+          if (e.id === replyToEmail.id) {
+            return {
+              ...e,
+              replies: [...(e.replies || []), email]
+            };
+          }
+          return e;
+        });
+        setEmails(updatedEmails);
+        setReplyToEmail(null);
+      } else {
+        // For new emails
+        const newEmail = {
+          ...email,
+          id: `email-${Date.now()}`,
+          folder: "sent",
+          read: true,
+          date: new Date().toISOString()
+        };
+        setEmails([newEmail, ...emails]);
+      }
       
-      setEmails([sentEmail, ...emails]);
-      setIsSending(false);
+      setIsLoading(false);
       setIsComposeOpen(false);
-      setNewEmail({
-        to: '',
-        subject: '',
-        content: ''
-      });
       
       toast({
         title: "Email sent",
-        description: "Your email has been sent successfully.",
+        description: "Your email has been sent successfully."
       });
     }, 1500);
   };
 
+  const handleDeleteEmail = (emailId: string) => {
+    const updatedEmails = emails.map(email => {
+      if (email.id === emailId) {
+        return { ...email, folder: "trash" };
+      }
+      return email;
+    });
+    
+    setEmails(updatedEmails);
+    setSelectedEmail(null);
+    
+    toast({
+      title: "Email moved to trash",
+      description: "The email has been moved to the trash folder."
+    });
+  };
+
+  const handleArchiveEmail = (emailId: string) => {
+    const updatedEmails = emails.map(email => {
+      if (email.id === emailId) {
+        return { ...email, folder: "archive" };
+      }
+      return email;
+    });
+    
+    setEmails(updatedEmails);
+    setSelectedEmail(null);
+    
+    toast({
+      title: "Email archived",
+      description: "The email has been archived."
+    });
+  };
+
+  const handleStarEmail = (emailId: string) => {
+    const updatedEmails = emails.map(email => {
+      if (email.id === emailId) {
+        return { ...email, starred: !email.starred };
+      }
+      return email;
+    });
+    
+    setEmails(updatedEmails);
+    
+    toast({
+      title: "Email updated",
+      description: "Email starred status has been updated."
+    });
+  };
+
+  const handleMarkAsRead = (emailId: string) => {
+    const updatedEmails = emails.map(email => {
+      if (email.id === emailId) {
+        return { ...email, read: true };
+      }
+      return email;
+    });
+    
+    setEmails(updatedEmails);
+  };
+
+  const handleSelectEmail = (email: Email) => {
+    setSelectedEmail(email);
+    
+    // Mark as read when selected
+    if (!email.read) {
+      handleMarkAsRead(email.id);
+    }
+  };
+
+  const handleReplyToEmail = (email: Email) => {
+    setReplyToEmail(email);
+    setIsComposeOpen(true);
+  };
+
+  const folders = [
+    { value: "inbox", label: "Inbox", icon: InboxIcon },
+    { value: "sent", label: "Sent", icon: Send },
+    { value: "archive", label: "Archived", icon: Archive },
+    { value: "trash", label: "Trash", icon: Trash2 }
+  ];
+
+  const unreadCount = emails.filter(email => !email.read && email.folder === "inbox").length;
+
   return (
     <DashboardLayout>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inbox</h1>
-          <p className="text-gray-500">Manage your emails and communications</p>
-        </div>
-        <Button 
-          onClick={() => setIsComposeOpen(true)}
-          className="bg-care-primary"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Compose
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <Card className="p-4">
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                <Input 
-                  placeholder="Search emails" 
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <nav className="space-y-1">
-              <Button 
-                variant={activeFolder === 'inbox' ? "default" : "ghost"} 
-                className={`w-full justify-start ${activeFolder === 'inbox' ? "bg-care-primary" : ""}`}
-                onClick={() => setActiveFolder('inbox')}
-              >
-                <InboxIcon className="mr-2 h-4 w-4" />
-                Inbox
-                <Badge className="ml-auto" variant="secondary">
-                  {emails.filter(e => e.folder === 'inbox' && !e.isRead).length}
-                </Badge>
-              </Button>
-              <Button 
-                variant={activeFolder === 'sent' ? "default" : "ghost"} 
-                className={`w-full justify-start ${activeFolder === 'sent' ? "bg-care-primary" : ""}`}
-                onClick={() => setActiveFolder('sent')}
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Sent
-              </Button>
-              <Button 
-                variant={activeFolder === 'drafts' ? "default" : "ghost"} 
-                className={`w-full justify-start ${activeFolder === 'drafts' ? "bg-care-primary" : ""}`}
-                onClick={() => setActiveFolder('drafts')}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Drafts
-              </Button>
-              <Button 
-                variant={activeFolder === 'archived' ? "default" : "ghost"} 
-                className={`w-full justify-start ${activeFolder === 'archived' ? "bg-care-primary" : ""}`}
-                onClick={() => setActiveFolder('archived')}
-              >
-                <Archive className="mr-2 h-4 w-4" />
-                Archived
-              </Button>
-            </nav>
-          </Card>
+      <div className="h-full flex flex-col">
+        <div className="border-b p-4 flex items-center justify-between bg-white">
+          <h1 className="text-2xl font-bold text-care-dark">Inbox</h1>
+          <Button 
+            onClick={() => {
+              setReplyToEmail(null);
+              setIsComposeOpen(true);
+            }}
+            className="bg-care-primary hover:bg-care-dark"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Compose
+          </Button>
         </div>
         
-        {/* Email List & Content */}
-        <div className="lg:col-span-3">
-          <Card className="h-[calc(100vh-13rem)] flex flex-col">
-            {filteredEmails.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
-                {/* Email List */}
-                <div className="border-r border-gray-200 overflow-auto">
-                  {filteredEmails.map(email => (
-                    <div 
-                      key={email.id} 
-                      className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                        selectedEmail?.id === email.id ? 'bg-gray-50' : ''
-                      } ${!email.isRead ? 'font-medium' : ''}`}
-                      onClick={() => handleEmailClick(email)}
-                    >
-                      <div className="flex items-center mb-2">
-                        <Avatar className="h-8 w-8 mr-3">
-                          <AvatarImage src={email.sender.avatar} />
-                          <AvatarFallback>{email.sender.initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{email.sender.name}</p>
-                          <p className="text-xs text-gray-500 truncate">{email.date}</p>
-                        </div>
-                        <button 
-                          className="text-gray-400 hover:text-yellow-400"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStarEmail(email.id);
-                          }}
-                        >
-                          <Star className={`h-4 w-4 ${email.isStarred ? 'text-yellow-400 fill-yellow-400' : ''}`} />
-                        </button>
-                      </div>
-                      <h3 className="text-sm font-medium mb-1 truncate">{email.subject}</h3>
-                      <p className="text-xs text-gray-500 truncate">{email.content.split('\n')[0]}</p>
-                    </div>
-                  ))}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <div className="w-64 border-r bg-white">
+            <div className="p-4">
+              <Button 
+                variant="outline" 
+                className="w-full flex justify-start" 
+                onClick={() => {
+                  setReplyToEmail(null);
+                  setIsComposeOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Compose Email
+              </Button>
+            </div>
+            
+            <nav className="px-2">
+              {folders.map((folder) => {
+                const Icon = folder.icon;
+                return (
+                  <button
+                    key={folder.value}
+                    onClick={() => {
+                      setCurrentFolder(folder.value as EmailFolder);
+                      setSelectedEmail(null);
+                    }}
+                    className={`w-full flex items-center px-3 py-2 my-1 rounded text-left ${
+                      currentFolder === folder.value 
+                        ? "bg-care-primary/10 text-care-primary" 
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 mr-3 ${currentFolder === folder.value ? "text-care-primary" : ""}`} />
+                    {folder.label}
+                    {folder.value === "inbox" && unreadCount > 0 && (
+                      <span className="ml-auto bg-care-primary text-white text-xs rounded-full px-2 py-0.5">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+          
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
+            {/* Email List */}
+            <div className={`w-full md:w-1/3 border-r overflow-hidden ${selectedEmail ? 'hidden md:block' : ''}`}>
+              <div className="p-4 border-b bg-white">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search emails..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-                
-                {/* Email Content */}
-                <div className="overflow-auto flex flex-col h-full">
-                  {selectedEmail ? (
-                    <>
-                      <div className="p-4 border-b border-gray-200">
-                        <div className="flex justify-between items-start mb-4">
-                          <h2 className="text-lg font-bold">{selectedEmail.subject}</h2>
-                          <div className="flex space-x-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleArchiveEmail(selectedEmail.id)}
-                            >
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleDeleteEmail(selectedEmail.id)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center mb-4">
-                          <Avatar className="h-10 w-10 mr-3">
-                            <AvatarImage src={selectedEmail.sender.avatar} />
-                            <AvatarFallback>{selectedEmail.sender.initials}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{selectedEmail.sender.name}</p>
-                            <p className="text-xs text-gray-500">{selectedEmail.sender.email}</p>
-                          </div>
-                          <p className="ml-auto text-sm text-gray-500">{selectedEmail.date}</p>
-                        </div>
-                      </div>
-                      <div className="p-4 flex-1 overflow-auto">
-                        <div className="whitespace-pre-line text-sm">
-                          {selectedEmail.content}
-                        </div>
-                      </div>
-                      <div className="p-4 border-t border-gray-200 mt-auto">
-                        <div className="flex gap-2">
-                          <Button onClick={() => {
-                            setNewEmail({
-                              to: selectedEmail.sender.email,
-                              subject: `Re: ${selectedEmail.subject}`,
-                              content: `\n\n-------- Original Message --------\nFrom: ${selectedEmail.sender.name}\nDate: ${selectedEmail.date}\nSubject: ${selectedEmail.subject}\n\n${selectedEmail.content}`
-                            });
-                            setIsComposeOpen(true);
-                          }}>
-                            Reply
-                          </Button>
-                          <Button variant="outline">
-                            Forward
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <Mail className="h-12 w-12 mb-2" />
-                      <p>Select an email to view</p>
-                    </div>
-                  )}
-                </div>
+              </div>
+              
+              <EmailList 
+                emails={filteredEmails} 
+                selectedEmailId={selectedEmail?.id}
+                onSelectEmail={handleSelectEmail}
+                onDeleteEmail={handleDeleteEmail}
+                onArchiveEmail={handleArchiveEmail}
+                onStarEmail={handleStarEmail}
+              />
+            </div>
+            
+            {/* Email View */}
+            {selectedEmail ? (
+              <div className="flex-1 overflow-auto">
+                <EmailView 
+                  email={selectedEmail} 
+                  onReply={handleReplyToEmail}
+                  onDelete={() => handleDeleteEmail(selectedEmail.id)}
+                  onArchive={() => handleArchiveEmail(selectedEmail.id)}
+                  onStar={() => handleStarEmail(selectedEmail.id)}
+                  onBack={() => setSelectedEmail(null)}
+                />
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                {activeFolder === 'inbox' ? (
-                  <>
-                    <InboxIcon className="h-12 w-12 mb-2" />
-                    <p>Your inbox is empty</p>
-                  </>
-                ) : activeFolder === 'sent' ? (
-                  <>
-                    <Send className="h-12 w-12 mb-2" />
-                    <p>No sent emails</p>
-                  </>
-                ) : activeFolder === 'drafts' ? (
-                  <>
-                    <Mail className="h-12 w-12 mb-2" />
-                    <p>No draft emails</p>
-                  </>
-                ) : (
-                  <>
-                    <Archive className="h-12 w-12 mb-2" />
-                    <p>No archived emails</p>
-                  </>
-                )}
+              <div className="hidden md:flex flex-1 items-center justify-center bg-blue-50">
+                <div className="text-center p-6">
+                  <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    {currentFolder === "inbox" ? (
+                      <InboxIcon size={32} className="text-blue-600" />
+                    ) : currentFolder === "sent" ? (
+                      <Send size={32} className="text-blue-600" />
+                    ) : currentFolder === "archive" ? (
+                      <Archive size={32} className="text-blue-600" />
+                    ) : (
+                      <Trash2 size={32} className="text-blue-600" />
+                    )}
+                  </div>
+                  <h2 className="text-xl font-medium mb-2">No email selected</h2>
+                  <p className="text-gray-500 max-w-sm">
+                    Select an email from the list to view its contents
+                  </p>
+                </div>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
       
-      {/* Compose Email Dialog */}
-      <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Compose Email</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <label className="text-sm font-medium" htmlFor="to">To:</label>
-              <Input 
-                id="to"
-                value={newEmail.to} 
-                onChange={(e) => setNewEmail({...newEmail, to: e.target.value})}
-                placeholder="recipient@example.com"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium" htmlFor="subject">Subject:</label>
-              <Input 
-                id="subject"
-                value={newEmail.subject} 
-                onChange={(e) => setNewEmail({...newEmail, subject: e.target.value})}
-                placeholder="Email subject"
-              />
-            </div>
-            <div>
-              <Textarea 
-                value={newEmail.content} 
-                onChange={(e) => setNewEmail({...newEmail, content: e.target.value})}
-                placeholder="Write your message here..."
-                rows={10}
-                className="min-h-[200px]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsComposeOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSendEmail} 
-              className="bg-care-primary"
-              disabled={isSending}
-            >
-              {isSending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Send
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ComposeDialog 
+        open={isComposeOpen} 
+        onOpenChange={setIsComposeOpen}
+        onSend={handleSendEmail}
+        replyToEmail={replyToEmail}
+        isLoading={isLoading}
+      />
     </DashboardLayout>
   );
 };
