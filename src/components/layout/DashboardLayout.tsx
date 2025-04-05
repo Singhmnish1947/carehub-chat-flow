@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -16,10 +16,14 @@ import {
   Settings, 
   Bot, 
   Mail, 
-  CheckSquare
+  CheckSquare,
+  Search,
+  Bell,
+  Plus
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -54,6 +58,7 @@ const navItems: NavItem[] = [
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -63,22 +68,48 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Link to="/dashboard" className="flex items-center space-x-2">
             <img 
               src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-              alt="CareHub Logo" 
+              alt="HavenMed Logo" 
               className="h-8 w-8" 
             />
-            <h1 className="text-xl font-bold text-care-dark">CareHub</h1>
+            <h1 className="text-xl font-bold text-care-dark">HavenMed</h1>
           </Link>
         </div>
         
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          {navItems.map((item) => (
+        <div className="px-4 py-3 border-b border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase">Main Menu</p>
+        </div>
+        
+        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+          {navItems.slice(0, 6).map((item) => (
             <Link 
               key={item.href}
               to={item.href} 
               className={cn(
                 "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 location.pathname === item.href 
-                  ? "bg-care-primary text-white" 
+                  ? "bg-black text-white" 
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon size={18} />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+        
+        <div className="px-4 py-3 border-b border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase">Other Menu</p>
+        </div>
+        
+        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+          {navItems.slice(6).map((item) => (
+            <Link 
+              key={item.href}
+              to={item.href} 
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname === item.href 
+                  ? "bg-black text-white" 
                   : "text-gray-700 hover:bg-gray-100"
               )}
             >
@@ -89,6 +120,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </nav>
         
         <div className="p-4 border-t border-gray-200">
+          <div className="px-4 py-3">
+            <p className="text-xs font-medium text-gray-500">Help</p>
+          </div>
           <div className="flex items-center space-x-3">
             <Avatar>
               <AvatarImage src="/placeholder.svg" />
@@ -97,13 +131,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm">Dr. John Doe</p>
-              <p className="text-xs text-gray-500 truncate">Cardiologist</p>
+              <p className="font-medium text-sm">Help Center</p>
+              <p className="text-xs text-gray-500 truncate">Get help with HavenMed</p>
             </div>
-            <Button variant="ghost" size="icon" className="text-gray-500 hover:text-care-dark">
-              <Settings size={18} />
-              <span className="sr-only">Settings</span>
-            </Button>
           </div>
         </div>
       </aside>
@@ -113,10 +143,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="flex items-center space-x-2">
           <img 
             src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-            alt="CareHub Logo" 
+            alt="HavenMed Logo" 
             className="h-8 w-8" 
           />
-          <h1 className="text-xl font-bold text-care-dark">CareHub</h1>
+          <h1 className="text-xl font-bold text-care-dark">HavenMed</h1>
         </div>
         
         <Button 
@@ -147,10 +177,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <div className="flex items-center space-x-2">
                   <img 
                     src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-                    alt="CareHub Logo" 
+                    alt="HavenMed Logo" 
                     className="h-8 w-8" 
                   />
-                  <h1 className="text-xl font-bold text-care-dark">CareHub</h1>
+                  <h1 className="text-xl font-bold text-care-dark">HavenMed</h1>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -163,15 +193,39 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   </svg>
                 </Button>
               </div>
+              <div className="px-4 py-3 border-b border-gray-200">
+                <p className="text-xs font-medium text-gray-500 uppercase">Main Menu</p>
+              </div>
               <nav className="mt-5 px-2 space-y-1">
-                {navItems.map((item) => (
+                {navItems.slice(0, 6).map((item) => (
                   <Link 
                     key={item.href}
                     to={item.href} 
                     className={cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                       location.pathname === item.href 
-                        ? "bg-care-primary text-white" 
+                        ? "bg-black text-white" 
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <item.icon size={18} />
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+              <div className="px-4 py-3 border-b border-t border-gray-200">
+                <p className="text-xs font-medium text-gray-500 uppercase">Other Menu</p>
+              </div>
+              <nav className="px-2 space-y-1">
+                {navItems.slice(6).map((item) => (
+                  <Link 
+                    key={item.href}
+                    to={item.href} 
+                    className={cn(
+                      "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                      location.pathname === item.href 
+                        ? "bg-black text-white" 
                         : "text-gray-700 hover:bg-gray-100"
                     )}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -183,6 +237,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </nav>
             </div>
             <div className="border-t border-gray-200 p-4">
+              <div className="px-4 py-2">
+                <p className="text-xs font-medium text-gray-500">Help</p>
+              </div>
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarImage src="/placeholder.svg" />
@@ -191,8 +248,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">Dr. John Doe</p>
-                  <p className="text-xs text-gray-500 truncate">Cardiologist</p>
+                  <p className="font-medium text-sm">Help Center</p>
+                  <p className="text-xs text-gray-500 truncate">Get help with HavenMed</p>
                 </div>
               </div>
             </div>
@@ -202,7 +259,36 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
       {/* Main content */}
       <div className="flex-1 md:pl-64">
-        <div className="p-4 md:p-6 pt-16 md:pt-6">
+        <div className="hidden md:flex fixed right-0 left-64 bg-white z-10 h-16 items-center justify-between px-6 border-b border-gray-200">
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+            <Input 
+              placeholder="Search here" 
+              className="pl-10 rounded-full bg-white border border-gray-200"
+            />
+          </div>
+          <div className="flex items-center space-x-3">
+            <Button variant="outline" size="sm" className="rounded-full">
+              <Plus size={16} className="mr-1" /> Add
+            </Button>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Bell size={20} />
+            </Button>
+            <div className="flex items-center space-x-3">
+              <Avatar>
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback className="bg-care-primary text-white">
+                  JD
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-medium">Jack Chain</p>
+                <p className="text-xs text-gray-500">Super admin</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 md:p-6 pt-20 md:pt-24">
           {children}
         </div>
       </div>
