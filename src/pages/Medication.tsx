@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, FileEdit, Trash2, AlertCircle } from "lucide-react";
+import { Search, Plus, FileEdit, Trash2, AlertCircle, X } from "lucide-react";
 import {
   Table,
   TableBody,
