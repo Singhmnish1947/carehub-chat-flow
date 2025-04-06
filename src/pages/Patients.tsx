@@ -43,6 +43,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+// Define types based on our Supabase schema
+type PatientType = Database['public']['Enums']['patient_type'];
+type PatientStatus = Database['public']['Enums']['patient_status'];
 
 // Patient type definition with fields matching Supabase schema
 interface Patient {
@@ -60,16 +65,17 @@ interface Patient {
   medical_history: string[] | null;
   allergies: string[] | null;
   emergency_contact: string | null;
-  patient_type: "OPD" | "IPD" | "Emergency";
+  patient_type: PatientType | null;
   registration_date: string | null;
   last_visit: string | null;
-  current_status: string | null;
+  current_status: PatientStatus | null;
   reward_points: number | null;
   user_id: string | null;
   created_at: string | null;
   updated_at: string | null;
-  // Additional UI fields
+  // Additional UI fields not in database
   profileImage?: string;
+  aadhar_number?: string | null;
 }
 
 const Patients = () => {
@@ -243,7 +249,8 @@ const Patients = () => {
               medical_history: tempPatient.medical_history || [],
               allergies: tempPatient.allergies || [],
               emergency_contact: tempPatient.emergency_contact || null,
-              patient_type: tempPatient.patient_type as "OPD" | "IPD" | "Emergency" || "OPD",
+              patient_type: tempPatient.patient_type as PatientType || "OPD",
+              aadhar_number: tempPatient.aadhar_number || null
             }
           ])
           .select();
@@ -251,10 +258,11 @@ const Patients = () => {
         if (error) throw error;
 
         if (data) {
-          const newPatient: Patient = {
+          const newPatient = {
             ...data[0],
             profileImage: `https://randomuser.me/api/portraits/${data[0].gender?.toLowerCase() === 'female' ? 'women' : 'men'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
           };
+          
           setPatients([...patients, newPatient]);
           
           toast({
@@ -282,8 +290,9 @@ const Patients = () => {
             medical_history: tempPatient.medical_history || [],
             allergies: tempPatient.allergies || [],
             emergency_contact: tempPatient.emergency_contact || null,
-            patient_type: tempPatient.patient_type as "OPD" | "IPD" | "Emergency" || currentPatient.patient_type,
-            updated_at: new Date().toISOString()
+            patient_type: tempPatient.patient_type as PatientType || currentPatient.patient_type,
+            updated_at: new Date().toISOString(),
+            aadhar_number: tempPatient.aadhar_number || null
           })
           .eq('id', currentPatient.id);
           

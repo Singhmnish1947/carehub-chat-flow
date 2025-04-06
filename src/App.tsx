@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,40 +28,45 @@ import Inventory from "./pages/Inventory";
 import Settings from "./pages/Settings";
 import AIChatbot from "./pages/AIChatbot";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/taskboard" element={<Taskboard />} />
-          <Route path="/inbox" element={<Inbox />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/patients" element={<Patients />} />
-          <Route path="/appointments" element={<Appointments />} />
-          <Route path="/payments" element={<Payments />} />
-          <Route path="/departments" element={<Departments />} />
-          <Route path="/locations" element={<Locations />} />
-          <Route path="/medication" element={<Medication />} />
-          <Route path="/rooms" element={<Rooms />} />
-          <Route path="/staff" element={<Staff />} />
-          <Route path="/inventory" element={<Inventory />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/ai-chatbot" element={<AIChatbot />} />
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/taskboard" element={<Taskboard />} />
+              <Route path="/inbox" element={<Inbox />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/doctors" element={<Doctors />} />
+              <Route path="/patients" element={<Patients />} />
+              <Route path="/appointments" element={<Appointments />} />
+              <Route path="/payments" element={<Payments />} />
+              <Route path="/departments" element={<Departments />} />
+              <Route path="/locations" element={<Locations />} />
+              <Route path="/medication" element={<Medication />} />
+              <Route path="/rooms" element={<Rooms />} />
+              <Route path="/staff" element={<Staff />} />
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/ai-chatbot" element={<AIChatbot />} />
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
