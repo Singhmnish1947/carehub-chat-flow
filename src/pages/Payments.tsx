@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -426,7 +425,7 @@ const Payments = () => {
   
   const handleMarkAsPaid = (billId: string) => {
     const updatedBills = bills.map((bill) =>
-      bill.id === billId ? { ...bill, status: "paid" } : bill
+      bill.id === billId ? { ...bill, status: "paid" as const } : bill
     );
     
     setBills(updatedBills);

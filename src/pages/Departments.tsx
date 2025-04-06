@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, FileEdit, Trash2, X, CheckCircle } from "lucide-react";
+import { Search, Plus, FileEdit, Trash2, X, CheckCircle, AlertCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -132,7 +131,6 @@ const Departments = () => {
   const [currentDepartment, setCurrentDepartment] = useState<Department | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   
-  // New department form state
   const [formData, setFormData] = useState<Omit<Department, "id">>({
     name: "",
     head: "",
@@ -253,7 +251,6 @@ const Departments = () => {
         <p className="text-gray-500">Manage hospital departments and specialties</p>
       </div>
 
-      {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <div className="relative w-full sm:w-64 md:w-96">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -285,7 +282,6 @@ const Departments = () => {
         </div>
       </div>
 
-      {/* Department List */}
       {viewMode === "table" ? (
         <Card>
           <CardContent className="p-0">
@@ -423,7 +419,6 @@ const Departments = () => {
         </div>
       )}
 
-      {/* Add Department Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -549,7 +544,6 @@ const Departments = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Department Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -669,7 +663,6 @@ const Departments = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Department Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
