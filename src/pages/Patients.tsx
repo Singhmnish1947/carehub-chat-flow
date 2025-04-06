@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -36,116 +36,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import {
+  Badge,
+  BadgeProps,
+} from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
-// Patient type definition with extended fields
+// Patient type definition with fields matching Supabase schema
 interface Patient {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  gender: string;
-  dateOfBirth: string;
-  address: string;
-  insuranceProvider: string;
-  insuranceNumber: string;
-  medicalHistory: string[];
-  registeredDate: string;
-  lastVisit: string;
-  // New fields
-  patientType: "internal" | "external";
-  bloodGroup?: string;
-  height?: string;
-  weight?: string;
-  allergies?: string[];
-  emergencyContact?: string;
-  occupation?: string;
-  maritalStatus?: string;
-  referredBy?: string;
+  email: string | null;
+  phone: string | null;
+  gender: string | null;
+  date_of_birth: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
+  blood_group: string | null;
+  medical_history: string[] | null;
+  allergies: string[] | null;
+  emergency_contact: string | null;
+  patient_type: "OPD" | "IPD" | "Emergency";
+  registration_date: string | null;
+  last_visit: string | null;
+  current_status: string | null;
+  reward_points: number | null;
+  user_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  // Additional UI fields
   profileImage?: string;
 }
 
-// Sample patient data with extended fields
-const initialPatients: Patient[] = [
-  {
-    id: "P001",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    phone: "555-123-4567",
-    gender: "Male",
-    dateOfBirth: "1985-04-12",
-    address: "123 Main St, Springfield, IL",
-    insuranceProvider: "Blue Cross",
-    insuranceNumber: "BC12345678",
-    medicalHistory: ["Hypertension", "Diabetes Type 2"],
-    registeredDate: "2022-01-15",
-    lastVisit: "2023-11-22",
-    patientType: "internal",
-    bloodGroup: "A+",
-    height: "178 cm",
-    weight: "75 kg",
-    allergies: ["Penicillin"],
-    emergencyContact: "555-987-6543",
-    occupation: "Software Engineer",
-    maritalStatus: "Married",
-    referredBy: "Dr. Emily Johnson",
-    profileImage: "https://randomuser.me/api/portraits/men/1.jpg",
-  },
-  {
-    id: "P002",
-    name: "Jane Doe",
-    email: "jane.doe@example.com",
-    phone: "555-987-6543",
-    gender: "Female",
-    dateOfBirth: "1990-08-24",
-    address: "456 Oak Lane, Riverdale, NY",
-    insuranceProvider: "Aetna",
-    insuranceNumber: "AET87654321",
-    medicalHistory: ["Asthma", "Allergies"],
-    registeredDate: "2021-06-10",
-    lastVisit: "2023-12-05",
-    patientType: "external",
-    bloodGroup: "O-",
-    height: "165 cm",
-    weight: "58 kg",
-    allergies: ["Nuts", "Shellfish"],
-    emergencyContact: "555-123-4567",
-    occupation: "Teacher",
-    maritalStatus: "Single",
-    referredBy: "Dr. Michael Brown",
-    profileImage: "https://randomuser.me/api/portraits/women/2.jpg",
-  },
-  {
-    id: "P003",
-    name: "Michael Johnson",
-    email: "michael.j@example.com",
-    phone: "555-555-5555",
-    gender: "Male",
-    dateOfBirth: "1978-11-30",
-    address: "789 Pine Road, Cedar City, UT",
-    insuranceProvider: "United Healthcare",
-    insuranceNumber: "UH98765432",
-    medicalHistory: ["Arthritis", "Heart Disease"],
-    registeredDate: "2020-03-22",
-    lastVisit: "2023-10-18",
-    patientType: "internal",
-    bloodGroup: "B+",
-    height: "182 cm",
-    weight: "88 kg",
-    allergies: ["Sulfa drugs"],
-    emergencyContact: "555-222-3333",
-    occupation: "Accountant",
-    maritalStatus: "Divorced",
-    referredBy: "Dr. Sarah Wilson",
-    profileImage: "https://randomuser.me/api/portraits/men/3.jpg",
-  },
-];
-
 const Patients = () => {
   const { toast } = useToast();
-  const [patients, setPatients] = useState<Patient[]>(initialPatients);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState<"all" | "name" | "phone" | "email" | "id">("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -156,47 +86,96 @@ const Patients = () => {
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [tempPatient, setTempPatient] = useState<Partial<Patient>>({});
 
+  // Fetch patients from Supabase
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('patients')
+          .select('*');
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          // Add placeholder profile images
+          const patientsWithImages = data.map((patient: Patient) => ({
+            ...patient,
+            profileImage: `https://randomuser.me/api/portraits/${patient.gender?.toLowerCase() === 'female' ? 'women' : 'men'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
+          }));
+          setPatients(patientsWithImages);
+        }
+      } catch (error: any) {
+        console.error('Error fetching patients:', error);
+        toast({
+          title: "Error",
+          description: `Failed to fetch patients: ${error.message}`,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, [toast]);
+
   // Filter patients based on search query, gender, and patient type
   const filteredPatients = patients.filter((patient) => {
     let matchesSearch = true;
     
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       switch (searchField) {
         case "name":
-          matchesSearch = patient.name.toLowerCase().includes(searchQuery.toLowerCase());
+          matchesSearch = patient.name.toLowerCase().includes(query);
           break;
         case "phone":
-          matchesSearch = patient.phone.toLowerCase().includes(searchQuery.toLowerCase());
+          matchesSearch = patient.phone?.toLowerCase().includes(query) || false;
           break;
         case "email":
-          matchesSearch = patient.email.toLowerCase().includes(searchQuery.toLowerCase());
+          matchesSearch = patient.email?.toLowerCase().includes(query) || false;
           break;
         case "id":
-          matchesSearch = patient.id.toLowerCase().includes(searchQuery.toLowerCase());
+          matchesSearch = patient.id.toLowerCase().includes(query);
           break;
         default:
           matchesSearch = 
-            patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            patient.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            patient.phone.toLowerCase().includes(searchQuery.toLowerCase());
+            patient.name.toLowerCase().includes(query) ||
+            (patient.email?.toLowerCase().includes(query) || false) ||
+            patient.id.toLowerCase().includes(query) ||
+            (patient.phone?.toLowerCase().includes(query) || false);
       }
     }
 
     const matchesGender =
-      filterGender === "all" || patient.gender.toLowerCase() === filterGender.toLowerCase();
+      filterGender === "all" || patient.gender?.toLowerCase() === filterGender.toLowerCase();
 
     const matchesPatientType =
-      filterPatientType === "all" || patient.patientType === filterPatientType;
+      filterPatientType === "all" || patient.patient_type === filterPatientType;
 
     return matchesSearch && matchesGender && matchesPatientType;
   });
+
+  // Get badge variant based on patient type
+  const getPatientTypeBadgeVariant = (type: string): BadgeProps['variant'] => {
+    switch(type) {
+      case 'OPD': return 'default';
+      case 'IPD': return 'secondary';
+      case 'Emergency': return 'destructive';
+      default: return 'outline';
+    }
+  };
 
   // Handle creating a new patient
   const handleCreatePatient = () => {
     setDialogMode("create");
     setCurrentPatient(null);
-    setTempPatient({});
+    setTempPatient({
+      patient_type: "OPD",
+    });
     setIsDialogOpen(true);
   };
 
@@ -234,78 +213,141 @@ const Patients = () => {
   };
 
   // Handle form submission
-  const handleSubmit = () => {
-    if (!tempPatient.name || !tempPatient.email) {
+  const handleSubmit = async () => {
+    if (!tempPatient.name) {
       toast({
         title: "Error",
-        description: "Name and email are required fields.",
+        description: "Name is a required field.",
         variant: "destructive",
       });
       return;
     }
 
-    if (dialogMode === "create") {
-      // Create a new patient
-      const newPatient: Patient = {
-        id: `P${String(patients.length + 1).padStart(3, "0")}`,
-        name: tempPatient.name || "",
-        email: tempPatient.email || "",
-        phone: tempPatient.phone || "",
-        gender: tempPatient.gender || "Other",
-        dateOfBirth: tempPatient.dateOfBirth || new Date().toISOString().split("T")[0],
-        address: tempPatient.address || "",
-        insuranceProvider: tempPatient.insuranceProvider || "",
-        insuranceNumber: tempPatient.insuranceNumber || "",
-        medicalHistory: tempPatient.medicalHistory || [],
-        registeredDate: new Date().toISOString().split("T")[0],
-        lastVisit: new Date().toISOString().split("T")[0],
-        patientType: tempPatient.patientType || "external",
-        bloodGroup: tempPatient.bloodGroup,
-        height: tempPatient.height,
-        weight: tempPatient.weight,
-        allergies: tempPatient.allergies || [],
-        emergencyContact: tempPatient.emergencyContact,
-        occupation: tempPatient.occupation,
-        maritalStatus: tempPatient.maritalStatus,
-        referredBy: tempPatient.referredBy,
-        profileImage: tempPatient.profileImage || `https://randomuser.me/api/portraits/${tempPatient.gender?.toLowerCase() === 'female' ? 'women' : 'men'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
-      };
+    try {
+      if (dialogMode === "create") {
+        // Create a new patient
+        const { data, error } = await supabase
+          .from('patients')
+          .insert([
+            {
+              name: tempPatient.name,
+              email: tempPatient.email || null,
+              phone: tempPatient.phone || null,
+              gender: tempPatient.gender || null,
+              date_of_birth: tempPatient.date_of_birth || null,
+              address: tempPatient.address || null,
+              city: tempPatient.city || null,
+              state: tempPatient.state || null,
+              pincode: tempPatient.pincode || null,
+              blood_group: tempPatient.blood_group || null,
+              medical_history: tempPatient.medical_history || [],
+              allergies: tempPatient.allergies || [],
+              emergency_contact: tempPatient.emergency_contact || null,
+              patient_type: tempPatient.patient_type as "OPD" | "IPD" | "Emergency" || "OPD",
+            }
+          ])
+          .select();
 
-      setPatients([...patients, newPatient]);
-      
+        if (error) throw error;
+
+        if (data) {
+          const newPatient: Patient = {
+            ...data[0],
+            profileImage: `https://randomuser.me/api/portraits/${data[0].gender?.toLowerCase() === 'female' ? 'women' : 'men'}/${Math.floor(Math.random() * 70) + 1}.jpg`,
+          };
+          setPatients([...patients, newPatient]);
+          
+          toast({
+            title: "Success",
+            description: "Patient has been created successfully.",
+          });
+        }
+      } else {
+        // Update existing patient
+        if (!currentPatient) return;
+        
+        const { error } = await supabase
+          .from('patients')
+          .update({
+            name: tempPatient.name,
+            email: tempPatient.email || null,
+            phone: tempPatient.phone || null,
+            gender: tempPatient.gender || null,
+            date_of_birth: tempPatient.date_of_birth || null,
+            address: tempPatient.address || null,
+            city: tempPatient.city || null,
+            state: tempPatient.state || null,
+            pincode: tempPatient.pincode || null,
+            blood_group: tempPatient.blood_group || null,
+            medical_history: tempPatient.medical_history || [],
+            allergies: tempPatient.allergies || [],
+            emergency_contact: tempPatient.emergency_contact || null,
+            patient_type: tempPatient.patient_type as "OPD" | "IPD" | "Emergency" || currentPatient.patient_type,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', currentPatient.id);
+          
+        if (error) throw error;
+        
+        const updatedPatients = patients.map((patient) =>
+          patient.id === currentPatient.id
+            ? { ...patient, ...tempPatient, updated_at: new Date().toISOString() }
+            : patient
+        );
+        
+        setPatients(updatedPatients);
+        
+        toast({
+          title: "Success",
+          description: "Patient has been updated successfully.",
+        });
+      }
+
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error saving patient:', error);
       toast({
-        title: "Success",
-        description: "Patient has been created successfully.",
+        title: "Error",
+        description: `Failed to save patient: ${error.message}`,
+        variant: "destructive",
       });
-    } else {
-      // Update existing patient
-      if (!currentPatient) return;
-      
-      const updatedPatients = patients.map((patient) =>
-        patient.id === currentPatient.id
-          ? { ...patient, ...tempPatient } as Patient
-          : patient
-      );
-      
+    }
+  };
+
+  // Handle patient deletion
+  const handleDeletePatient = async (patientId: string) => {
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .delete()
+        .eq('id', patientId);
+
+      if (error) throw error;
+
+      const updatedPatients = patients.filter((patient) => patient.id !== patientId);
       setPatients(updatedPatients);
       
       toast({
         title: "Success",
-        description: "Patient has been updated successfully.",
+        description: "Patient has been deleted successfully.",
+      });
+    } catch (error: any) {
+      console.error('Error deleting patient:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete patient: ${error.message}`,
+        variant: "destructive",
       });
     }
-
-    setIsDialogOpen(false);
   };
 
-  // Handle patient deletion
-  const handleDeletePatient = (patientId: string) => {
-    const updatedPatients = patients.filter((patient) => patient.id !== patientId);
-    setPatients(updatedPatients);
-    
-    toast({
-      title: "Success",
-      description: "Patient has been deleted successfully.",
+  // Format date for display
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   };
 
@@ -381,9 +423,10 @@ const Patients = () => {
                 <SelectValue placeholder="Patient Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Patients</SelectItem>
-                <SelectItem value="internal">Internal</SelectItem>
-                <SelectItem value="external">External</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="OPD">OPD</SelectItem>
+                <SelectItem value="IPD">IPD</SelectItem>
+                <SelectItem value="Emergency">Emergency</SelectItem>
               </SelectContent>
             </Select>
 
@@ -412,13 +455,18 @@ const Patients = () => {
           <Tabs defaultValue="all" className="mb-6">
             <TabsList>
               <TabsTrigger value="all">All Patients ({patients.length})</TabsTrigger>
-              <TabsTrigger value="internal">Internal ({patients.filter(p => p.patientType === "internal").length})</TabsTrigger>
-              <TabsTrigger value="external">External ({patients.filter(p => p.patientType === "external").length})</TabsTrigger>
-              <TabsTrigger value="recent">Recent Visits ({patients.filter(p => new Date(p.lastVisit) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length})</TabsTrigger>
+              <TabsTrigger value="OPD">OPD ({patients.filter(p => p.patient_type === "OPD").length})</TabsTrigger>
+              <TabsTrigger value="IPD">IPD ({patients.filter(p => p.patient_type === "IPD").length})</TabsTrigger>
+              <TabsTrigger value="Emergency">Emergency ({patients.filter(p => p.patient_type === "Emergency").length})</TabsTrigger>
+              <TabsTrigger value="recent">Recent Visits ({patients.filter(p => p.last_visit && new Date(p.last_visit) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length})</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          {viewMode === "table" ? (
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          ) : viewMode === "table" ? (
             <Card className="w-full">
               <CardHeader className="pb-2">
                 <CardTitle>Patient List</CardTitle>
@@ -432,7 +480,7 @@ const Patients = () => {
                     <TableRow>
                       <TableHead>Patient</TableHead>
                       <TableHead>Contact</TableHead>
-                      <TableHead>Insurance</TableHead>
+                      <TableHead>Location</TableHead>
                       <TableHead>Medical</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -451,34 +499,45 @@ const Patients = () => {
                               <div>
                                 <div className="font-medium flex items-center gap-2">
                                   {patient.name} 
-                                  <Badge variant={patient.patientType === "internal" ? "default" : "outline"}>
-                                    {patient.patientType}
+                                  <Badge variant={getPatientTypeBadgeVariant(patient.patient_type)}>
+                                    {patient.patient_type}
                                   </Badge>
                                 </div>
-                                <div className="text-xs text-gray-500">{patient.id} · {patient.gender}, {patient.bloodGroup}</div>
+                                <div className="text-xs text-gray-500">
+                                  {patient.gender}, {patient.blood_group}{" "}
+                                  {patient.reward_points ? `• ${patient.reward_points} points` : ""}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div>{patient.phone}</div>
-                            <div className="text-xs text-gray-500">{patient.email}</div>
+                            <div>{patient.phone || "-"}</div>
+                            <div className="text-xs text-gray-500">{patient.email || "-"}</div>
                           </TableCell>
                           <TableCell>
-                            <div>{patient.insuranceProvider}</div>
-                            <div className="text-xs text-gray-500">{patient.insuranceNumber}</div>
+                            <div>{patient.city || "-"}</div>
+                            <div className="text-xs text-gray-500">{patient.state || "-"}</div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
-                              {patient.medicalHistory.map((condition, i) => (
+                              {patient.medical_history?.slice(0, 2).map((condition, i) => (
                                 <Badge key={i} variant="secondary" className="text-xs">
                                   {condition}
                                 </Badge>
                               ))}
+                              {patient.medical_history && patient.medical_history.length > 2 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{patient.medical_history.length - 2} more
+                                </Badge>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div>Last: {patient.lastVisit}</div>
-                            <div className="text-xs text-gray-500">Reg: {patient.registeredDate}</div>
+                            <div>Last: {patient.last_visit ? formatDate(patient.last_visit) : "-"}</div>
+                            <div className="text-xs text-gray-500">
+                              Reg: {patient.registration_date ? formatDate(patient.registration_date) : "-"} 
+                              {patient.current_status && <span> • {patient.current_status}</span>}
+                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
@@ -514,59 +573,72 @@ const Patients = () => {
               {filteredPatients.length > 0 ? (
                 filteredPatients.map((patient) => (
                   <Card key={patient.id} className="overflow-hidden">
-                    <div className={`p-6 flex flex-col items-center ${patient.patientType === "internal" ? "bg-gradient-to-r from-blue-50 to-indigo-50" : "bg-gradient-to-r from-gray-50 to-zinc-50"}`}>
+                    <div className={`p-6 flex flex-col items-center bg-gradient-to-r ${
+                      patient.patient_type === "OPD" ? "from-blue-50 to-indigo-50" : 
+                      patient.patient_type === "IPD" ? "from-green-50 to-teal-50" : 
+                      "from-orange-50 to-red-50"
+                    }`}>
                       <Avatar className="h-24 w-24 mb-4 border-2 border-white shadow-lg">
                         <AvatarImage src={patient.profileImage} alt={patient.name} />
                         <AvatarFallback className="text-lg">{patient.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <h3 className="font-semibold text-lg">{patient.name}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant={patient.patientType === "internal" ? "default" : "outline"}>
-                          {patient.patientType}
+                        <Badge variant={getPatientTypeBadgeVariant(patient.patient_type)}>
+                          {patient.patient_type}
                         </Badge>
-                        <span className="text-sm text-gray-500">{patient.id}</span>
+                        <span className="text-sm text-gray-500">{patient.id.substring(0, 8)}</span>
                       </div>
                       <div className="flex gap-2 mt-2">
-                        <Badge variant="secondary">{patient.gender}</Badge>
-                        {patient.bloodGroup && <Badge variant="secondary">{patient.bloodGroup}</Badge>}
+                        <Badge variant="secondary">{patient.gender || "Unknown"}</Badge>
+                        {patient.blood_group && <Badge variant="secondary">{patient.blood_group}</Badge>}
+                        {patient.reward_points ? (
+                          <Badge variant="outline" className="bg-amber-50">
+                            {patient.reward_points} points
+                          </Badge>
+                        ) : null}
                       </div>
                     </div>
                     
                     <CardContent className="p-4 space-y-3">
                       <div className="grid grid-cols-[20px_1fr] gap-2 items-center">
                         <Phone size={16} className="text-gray-500" />
-                        <span className="text-sm">{patient.phone}</span>
+                        <span className="text-sm">{patient.phone || "-"}</span>
                       </div>
                       <div className="grid grid-cols-[20px_1fr] gap-2 items-center">
                         <User size={16} className="text-gray-500" />
-                        <span className="text-sm">{patient.email}</span>
+                        <span className="text-sm">{patient.email || "-"}</span>
                       </div>
                       <div className="grid grid-cols-[20px_1fr] gap-2 items-center">
                         <MapPin size={16} className="text-gray-500" />
-                        <span className="text-sm truncate" title={patient.address}>
-                          {patient.address}
+                        <span className="text-sm truncate" title={patient.address || ""}>
+                          {patient.address ? `${patient.address}, ${patient.city || ''}, ${patient.state || ''}` : "-"}
                         </span>
                       </div>
                       <div className="grid grid-cols-[20px_1fr] gap-2 items-center">
                         <Clipboard size={16} className="text-gray-500" />
                         <div className="flex flex-wrap gap-1">
-                          {patient.medicalHistory.slice(0, 2).map((condition, i) => (
+                          {patient.medical_history?.slice(0, 2).map((condition, i) => (
                             <Badge key={i} variant="secondary" className="text-xs">
                               {condition}
                             </Badge>
                           ))}
-                          {patient.medicalHistory.length > 2 && (
+                          {patient.medical_history && patient.medical_history.length > 2 && (
                             <Badge variant="secondary" className="text-xs">
-                              +{patient.medicalHistory.length - 2} more
+                              +{patient.medical_history.length - 2} more
                             </Badge>
                           )}
+                          {!patient.medical_history || patient.medical_history.length === 0 ? (
+                            <span className="text-xs text-gray-500">No medical history</span>
+                          ) : null}
                         </div>
                       </div>
                     </CardContent>
                     
                     <div className="p-4 bg-gray-50 border-t flex flex-col gap-2">
                       <div className="text-xs text-gray-500">
-                        <span className="font-medium">Last Visit:</span> {patient.lastVisit}
+                        <span className="font-medium">Last Visit:</span> {patient.last_visit ? formatDate(patient.last_visit) : "-"}
+                        {patient.current_status && <span> • {patient.current_status}</span>}
                       </div>
                       <div className="flex justify-end gap-2">
                         <Button 
@@ -628,7 +700,7 @@ const Patients = () => {
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
-                  Email Address*
+                  Email Address
                 </label>
                 <Input
                   id="email"
@@ -637,7 +709,6 @@ const Patients = () => {
                   placeholder="johndoe@example.com"
                   value={tempPatient.email || ""}
                   onChange={handleInputChange}
-                  required
                 />
               </div>
               <div className="space-y-2">
@@ -647,7 +718,7 @@ const Patients = () => {
                 <Input
                   id="phone"
                   name="phone"
-                  placeholder="555-123-4567"
+                  placeholder="9876543210"
                   value={tempPatient.phone || ""}
                   onChange={handleInputChange}
                 />
@@ -675,39 +746,40 @@ const Patients = () => {
                   Patient Type
                 </label>
                 <Select
-                  value={tempPatient.patientType || "external"}
-                  onValueChange={(value) => handleSelectChange("patientType", value as "internal" | "external")}
+                  value={tempPatient.patient_type || "OPD"}
+                  onValueChange={(value) => handleSelectChange("patient_type", value)}
                 >
                   <SelectTrigger id="patientType">
                     <SelectValue placeholder="Select patient type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="internal">Internal</SelectItem>
-                    <SelectItem value="external">External</SelectItem>
+                    <SelectItem value="OPD">OPD</SelectItem>
+                    <SelectItem value="IPD">IPD</SelectItem>
+                    <SelectItem value="Emergency">Emergency</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <label htmlFor="dateOfBirth" className="text-sm font-medium">
+                <label htmlFor="date_of_birth" className="text-sm font-medium">
                   Date of Birth
                 </label>
                 <Input
-                  id="dateOfBirth"
-                  name="dateOfBirth"
+                  id="date_of_birth"
+                  name="date_of_birth"
                   type="date"
-                  value={tempPatient.dateOfBirth || ""}
+                  value={tempPatient.date_of_birth || ""}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="bloodGroup" className="text-sm font-medium">
+                <label htmlFor="blood_group" className="text-sm font-medium">
                   Blood Group
                 </label>
                 <Select
-                  value={tempPatient.bloodGroup || ""}
-                  onValueChange={(value) => handleSelectChange("bloodGroup", value)}
+                  value={tempPatient.blood_group || ""}
+                  onValueChange={(value) => handleSelectChange("blood_group", value)}
                 >
-                  <SelectTrigger id="bloodGroup">
+                  <SelectTrigger id="blood_group">
                     <SelectValue placeholder="Select blood group" />
                   </SelectTrigger>
                   <SelectContent>
@@ -723,81 +795,14 @@ const Patients = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label htmlFor="height" className="text-sm font-medium">
-                  Height
-                </label>
-                <Input
-                  id="height"
-                  name="height"
-                  placeholder="175 cm"
-                  value={tempPatient.height || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="weight" className="text-sm font-medium">
-                  Weight
-                </label>
-                <Input
-                  id="weight"
-                  name="weight"
-                  placeholder="70 kg"
-                  value={tempPatient.weight || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="maritalStatus" className="text-sm font-medium">
-                  Marital Status
-                </label>
-                <Select
-                  value={tempPatient.maritalStatus || ""}
-                  onValueChange={(value) => handleSelectChange("maritalStatus", value)}
-                >
-                  <SelectTrigger id="maritalStatus">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Single">Single</SelectItem>
-                    <SelectItem value="Married">Married</SelectItem>
-                    <SelectItem value="Divorced">Divorced</SelectItem>
-                    <SelectItem value="Widowed">Widowed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="occupation" className="text-sm font-medium">
-                  Occupation
-                </label>
-                <Input
-                  id="occupation"
-                  name="occupation"
-                  placeholder="Software Engineer"
-                  value={tempPatient.occupation || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="emergencyContact" className="text-sm font-medium">
+                <label htmlFor="emergency_contact" className="text-sm font-medium">
                   Emergency Contact
                 </label>
                 <Input
-                  id="emergencyContact"
-                  name="emergencyContact"
-                  placeholder="555-987-6543"
-                  value={tempPatient.emergencyContact || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="referredBy" className="text-sm font-medium">
-                  Referred By
-                </label>
-                <Input
-                  id="referredBy"
-                  name="referredBy"
-                  placeholder="Dr. Jane Smith"
-                  value={tempPatient.referredBy || ""}
+                  id="emergency_contact"
+                  name="emergency_contact"
+                  placeholder="9876543210"
+                  value={tempPatient.emergency_contact || ""}
                   onChange={handleInputChange}
                 />
               </div>
@@ -808,35 +813,60 @@ const Patients = () => {
                 <Input
                   id="address"
                   name="address"
-                  placeholder="123 Main St, City, State"
+                  placeholder="123 Main St"
                   value={tempPatient.address || ""}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="insuranceProvider" className="text-sm font-medium">
-                  Insurance Provider
+                <label htmlFor="city" className="text-sm font-medium">
+                  City
                 </label>
                 <Input
-                  id="insuranceProvider"
-                  name="insuranceProvider"
-                  placeholder="Blue Cross"
-                  value={tempPatient.insuranceProvider || ""}
+                  id="city"
+                  name="city"
+                  placeholder="Mumbai"
+                  value={tempPatient.city || ""}
                   onChange={handleInputChange}
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="insuranceNumber" className="text-sm font-medium">
-                  Insurance Number
+                <label htmlFor="state" className="text-sm font-medium">
+                  State
                 </label>
                 <Input
-                  id="insuranceNumber"
-                  name="insuranceNumber"
-                  placeholder="INS123456789"
-                  value={tempPatient.insuranceNumber || ""}
+                  id="state"
+                  name="state"
+                  placeholder="Maharashtra"
+                  value={tempPatient.state || ""}
                   onChange={handleInputChange}
                 />
               </div>
+              <div className="space-y-2">
+                <label htmlFor="pincode" className="text-sm font-medium">
+                  Pincode
+                </label>
+                <Input
+                  id="pincode"
+                  name="pincode"
+                  placeholder="400001"
+                  value={tempPatient.pincode || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="aadhar_number" className="text-sm font-medium">
+                  Aadhar Number
+                </label>
+                <Input
+                  id="aadhar_number"
+                  name="aadhar_number"
+                  placeholder="1234 5678 9012"
+                  value={tempPatient.aadhar_number || ""}
+                  onChange={handleInputChange}
+                />
+              </div>
+              {/* We would add more fields for medical_history and allergies as needed */}
             </div>
           </div>
           <DialogFooter>
