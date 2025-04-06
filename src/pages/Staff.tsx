@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -41,8 +40,8 @@ import { staffMembers } from "@/data/staffData";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Staff type from the data file
-import { Staff } from "@/types/task";
+// Staff type from the data file - use type-only import
+import type { Staff } from "@/types/task";
 
 // Extended staff interface with more fields
 interface ExtendedStaff extends Staff {
@@ -57,7 +56,7 @@ interface ExtendedStaff extends Staff {
   shift?: "morning" | "evening" | "night";
 }
 
-const Staff = () => {
+const StaffPage = () => {
   const { toast } = useToast();
   const [staff, setStaff] = useState<ExtendedStaff[]>(() => 
     // Initialize with extended data from staffMembers
@@ -648,4 +647,4 @@ const Staff = () => {
   );
 };
 
-export default Staff;
+export default StaffPage;
