@@ -10,7 +10,7 @@ import TaskDialog from "@/components/taskboard/TaskDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Task, TaskPriority, TaskStatus, Staff } from "@/types/task";
 import { taskboardData } from "@/data/taskboardData";
-import { staffData } from "@/data/staffData";
+import { staffMembers } from "@/data/staffData";
 
 const Taskboard = () => {
   const [tasks, setTasks] = useState<Task[]>(taskboardData);
@@ -184,24 +184,30 @@ const Taskboard = () => {
               title="To Do" 
               tasks={groupedTasks.todo}
               status="todo"
-              onTaskClick={handleEditTask}
-              onStatusChange={handleStatusChange}
+              count={groupedTasks.todo.length}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+              onMoveTask={handleStatusChange}
             />
             
             <TaskColumn 
               title="In Progress" 
               tasks={groupedTasks["in-progress"]}
               status="in-progress"
-              onTaskClick={handleEditTask}
-              onStatusChange={handleStatusChange}
+              count={groupedTasks["in-progress"].length}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+              onMoveTask={handleStatusChange}
             />
             
             <TaskColumn 
               title="Completed" 
               tasks={groupedTasks.completed}
               status="completed"
-              onTaskClick={handleEditTask}
-              onStatusChange={handleStatusChange}
+              count={groupedTasks.completed.length}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+              onMoveTask={handleStatusChange}
             />
           </div>
         </div>
@@ -212,9 +218,6 @@ const Taskboard = () => {
         onOpenChange={setIsDialogOpen}
         task={selectedTask}
         onSave={handleSaveTask}
-        onDelete={handleDeleteTask}
-        mode={dialogMode}
-        staff={staffData}
       />
     </DashboardLayout>
   );
