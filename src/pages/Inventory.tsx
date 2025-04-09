@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -197,23 +198,25 @@ const Inventory = () => {
         return;
       }
 
-      // Fix: Ensure we pass a single object with name and category defined, not an array
+      // Fix: Ensure we're inserting a single object with required fields
+      const newItem = {
+        name: formData.name,
+        category: formData.category,
+        description: formData.description || null,
+        unit: formData.unit || null,
+        current_stock: formData.current_stock || 0,
+        minimum_stock: formData.minimum_stock || 10,
+        price: formData.price || null,
+        manufacturer: formData.manufacturer || null,
+        supplier: formData.supplier || null,
+        batch_number: formData.batch_number || null,
+        expiry_date: formData.expiry_date || null,
+        location: formData.location || null
+      };
+
       const { data, error } = await supabase
         .from('inventory_items')
-        .insert({
-          name: formData.name,
-          category: formData.category,
-          description: formData.description || null,
-          unit: formData.unit || null,
-          current_stock: formData.current_stock || 0,
-          minimum_stock: formData.minimum_stock || 10,
-          price: formData.price || null,
-          manufacturer: formData.manufacturer || null,
-          supplier: formData.supplier || null,
-          batch_number: formData.batch_number || null,
-          expiry_date: formData.expiry_date || null,
-          location: formData.location || null
-        })
+        .insert(newItem)
         .select();
 
       if (error) throw error;
@@ -376,7 +379,6 @@ const Inventory = () => {
       transaction_type: "received",
       quantity: 1
     });
-    // Fix: Corrected method name to setIsTransactionDialogOpen
     setIsTransactionDialogOpen(true);
   };
 
@@ -953,4 +955,138 @@ const Inventory = () => {
                   id="edit-minimum_stock"
                   name="minimum_stock"
                   type="number"
-                  placeholder="1
+                  placeholder="10"
+                  value={formData.minimum_stock === undefined ? "" : formData.minimum_stock}
+                  onChange={(e) => handleNumberChange("minimum_stock", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleEditItem}>Update Item</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transaction Dialog */}
+      <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Record Inventory Transaction</DialogTitle>
+            <DialogDescription>
+              Record a stock receipt or issuance
+            </DialogDescription>
+          </DialogHeader>
+          {currentItem && (
+            <div className="py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Badge className={getCategoryColor(currentItem.category)}>
+                  {currentItem.category}
+                </Badge>
+                <h3 className="text-lg font-medium">{currentItem.name}</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Current Stock</p>
+                  <p className="text-lg">{currentItem.current_stock} {currentItem.unit}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Minimum Stock</p>
+                  <p className="text-lg">{currentItem.minimum_stock || 0} {currentItem.unit}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Transaction Type</label>
+                  <Select
+                    value={transactionData.transaction_type}
+                    onValueChange={(value) => setTransactionData({...transactionData, transaction_type: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select transaction type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="received">Received</SelectItem>
+                      <SelectItem value="issued">Issued</SelectItem>
+                      <SelectItem value="adjusted">Adjustment</SelectItem>
+                      <SelectItem value="returned">Returned</SelectItem>
+                      <SelectItem value="expired">Expired</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label htmlFor="transaction-quantity" className="text-sm font-medium">
+                    Quantity
+                  </label>
+                  <Input
+                    id="transaction-quantity"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={transactionData.quantity}
+                    onChange={(e) => setTransactionData({
+                      ...transactionData,
+                      quantity: parseInt(e.target.value) || 0
+                    })}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="transaction-notes" className="text-sm font-medium">
+                    Notes (Optional)
+                  </label>
+                  <Textarea
+                    id="transaction-notes"
+                    placeholder="Add notes about this transaction"
+                    value={transactionData.notes || ""}
+                    onChange={(e) => setTransactionData({
+                      ...transactionData,
+                      notes: e.target.value
+                    })}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleTransaction}>Record Transaction</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-500">Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this inventory item? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {currentItem && (
+            <div className="py-4">
+              <p className="font-medium">{currentItem.name}</p>
+              <p className="text-sm text-gray-500">{currentItem.category}</p>
+            </div>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleDeleteItem}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </DashboardLayout>
+  );
+};
+
+export default Inventory;
