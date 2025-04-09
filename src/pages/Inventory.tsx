@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -198,13 +197,23 @@ const Inventory = () => {
         return;
       }
 
+      // Fix: Ensure we pass a single object with name and category defined, not an array
       const { data, error } = await supabase
         .from('inventory_items')
-        .insert([{ 
-          ...formData,
+        .insert({
+          name: formData.name,
+          category: formData.category,
+          description: formData.description || null,
+          unit: formData.unit || null,
           current_stock: formData.current_stock || 0,
           minimum_stock: formData.minimum_stock || 10,
-        }])
+          price: formData.price || null,
+          manufacturer: formData.manufacturer || null,
+          supplier: formData.supplier || null,
+          batch_number: formData.batch_number || null,
+          expiry_date: formData.expiry_date || null,
+          location: formData.location || null
+        })
         .select();
 
       if (error) throw error;
@@ -367,7 +376,8 @@ const Inventory = () => {
       transaction_type: "received",
       quantity: 1
     });
-    setIsTransactionDialog(true);
+    // Fix: Corrected method name to setIsTransactionDialogOpen
+    setIsTransactionDialogOpen(true);
   };
 
   // Open delete dialog with item data
@@ -943,212 +953,4 @@ const Inventory = () => {
                   id="edit-minimum_stock"
                   name="minimum_stock"
                   type="number"
-                  placeholder="10"
-                  value={formData.minimum_stock === undefined ? "" : formData.minimum_stock}
-                  onChange={(e) => handleNumberChange("minimum_stock", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="edit-price" className="text-sm font-medium">
-                  Price (₹)
-                </label>
-                <Input
-                  id="edit-price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={formData.price === undefined ? "" : formData.price}
-                  onChange={(e) => handleNumberChange("price", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="edit-manufacturer" className="text-sm font-medium">
-                  Manufacturer
-                </label>
-                <Input
-                  id="edit-manufacturer"
-                  name="manufacturer"
-                  placeholder="Cipla, Sun Pharma, etc."
-                  value={formData.manufacturer || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="edit-supplier" className="text-sm font-medium">
-                  Supplier
-                </label>
-                <Input
-                  id="edit-supplier"
-                  name="supplier"
-                  placeholder="MedSupply India"
-                  value={formData.supplier || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="edit-batch_number" className="text-sm font-medium">
-                  Batch Number
-                </label>
-                <Input
-                  id="edit-batch_number"
-                  name="batch_number"
-                  placeholder="BN12345"
-                  value={formData.batch_number || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="edit-expiry_date" className="text-sm font-medium">
-                  Expiry Date
-                </label>
-                <Input
-                  id="edit-expiry_date"
-                  name="expiry_date"
-                  type="date"
-                  value={formData.expiry_date || ""}
-                  onChange={(e) => handleDateChange("expiry_date", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="edit-location" className="text-sm font-medium">
-                  Location
-                </label>
-                <Input
-                  id="edit-location"
-                  name="location"
-                  placeholder="Pharmacy Shelf A1"
-                  value={formData.location || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="edit-description" className="text-sm font-medium">
-                Description
-              </label>
-              <Textarea
-                id="edit-description"
-                name="description"
-                placeholder="Enter item description"
-                value={formData.description || ""}
-                onChange={handleInputChange}
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleEditItem}>Update Item</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Transaction Dialog */}
-      <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Record Inventory Transaction</DialogTitle>
-            <DialogDescription>
-              {currentItem && (
-                <span>Record stock movement for <strong>{currentItem.name}</strong></span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Transaction Type
-              </label>
-              <Select
-                value={transactionData.transaction_type}
-                onValueChange={(value) => setTransactionData({
-                  ...transactionData,
-                  transaction_type: value
-                })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select transaction type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="received">Stock Received</SelectItem>
-                  <SelectItem value="issued">Stock Issued</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="transaction-quantity" className="text-sm font-medium">
-                Quantity
-              </label>
-              <Input
-                id="transaction-quantity"
-                type="number"
-                min="1"
-                value={transactionData.quantity}
-                onChange={(e) => setTransactionData({
-                  ...transactionData,
-                  quantity: parseInt(e.target.value) || 0
-                })}
-                required
-              />
-              {currentItem && transactionData.transaction_type === "issued" && (
-                <p className="text-xs text-gray-500">
-                  Current stock: {currentItem.current_stock} {currentItem.unit || ''}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="transaction-notes" className="text-sm font-medium">
-                Notes
-              </label>
-              <Textarea
-                id="transaction-notes"
-                placeholder="Additional notes for this transaction"
-                value={transactionData.notes || ""}
-                onChange={(e) => setTransactionData({
-                  ...transactionData,
-                  notes: e.target.value
-                })}
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleTransaction}>
-              Record Transaction
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              {currentItem && (
-                <span>Are you sure you want to delete <strong>{currentItem.name}</strong>? This action cannot be undone.</span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button variant="destructive" onClick={handleDeleteItem}>
-              Delete Item
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </DashboardLayout>
-  );
-};
-
-export default Inventory;
+                  placeholder="1
