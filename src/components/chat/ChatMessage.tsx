@@ -2,9 +2,12 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { Check, CheckCheck } from "lucide-react";
 
 export type MessageType = {
   id: string;
+  conversationId: string;
   content: string;
   sender: {
     id: string;
@@ -13,6 +16,7 @@ export type MessageType = {
   };
   timestamp: string;
   isCurrentUser: boolean;
+  isRead: boolean;
 };
 
 interface ChatMessageProps {
@@ -20,7 +24,7 @@ interface ChatMessageProps {
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
-  const { content, sender, timestamp, isCurrentUser } = message;
+  const { content, sender, timestamp, isCurrentUser, isRead } = message;
   
   return (
     <div
@@ -48,20 +52,32 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div className="flex flex-col">
           <div
             className={cn(
-              "rounded-lg py-2 px-3",
+              "rounded-lg py-2 px-3 glass",
               isCurrentUser 
-                ? "bg-care-primary text-white rounded-tr-none" 
-                : "bg-care-gray text-gray-800 rounded-tl-none border border-care-border"
+                ? "bg-care-primary/90 text-white rounded-tr-none" 
+                : "bg-white/80 text-gray-800 rounded-tl-none border border-care-border"
             )}
           >
             {content}
           </div>
-          <span className={cn(
-            "text-xs mt-1 text-gray-500", 
-            isCurrentUser ? "text-right" : "text-left"
+          <div className={cn(
+            "flex items-center mt-1 text-xs text-gray-500", 
+            isCurrentUser ? "justify-end" : "justify-start"
           )}>
-            {new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
+            <span>
+              {formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
+            </span>
+            
+            {isCurrentUser && (
+              <span className="ml-1 flex items-center">
+                {isRead ? (
+                  <CheckCheck size={12} className="text-care-primary" />
+                ) : (
+                  <Check size={12} />
+                )}
+              </span>
+            )}
+          </div>
         </div>
       </div>
       

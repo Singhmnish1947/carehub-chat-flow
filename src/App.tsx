@@ -15,7 +15,6 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Create placeholder pages for all the required routes
 import Taskboard from "./pages/Taskboard";
-import Inbox from "./pages/Inbox";
 import Doctors from "./pages/Doctors";
 import Patients from "./pages/Patients";
 import Appointments from "./pages/Appointments";
@@ -56,11 +55,6 @@ const App = () => {
               <Route path="/taskboard" element={
                 <ProtectedRoute>
                   <Taskboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/inbox" element={
-                <ProtectedRoute>
-                  <Inbox />
                 </ProtectedRoute>
               } />
               <Route path="/chat" element={

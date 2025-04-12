@@ -1,94 +1,39 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import ChatHeader from "./ChatHeader";
-import ChatMessage, { MessageType } from "./ChatMessage";
+import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/components/ui/use-toast";
+import { useChat } from "@/hooks/use-chat";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChatWindowProps {
-  recipientId: string;
-  currentUserId: string;
+  conversationId: string;
   showBackButton?: boolean;
   onBack?: () => void;
 }
 
-// Mock data for the demo
-const mockMessages: MessageType[] = [
-  {
-    id: "1",
-    content: "Hello! How are you feeling today?",
-    sender: {
-      id: "care-provider-1",
-      name: "Dr. Sarah Johnson",
-      avatarUrl: "/placeholder.svg"
-    },
-    timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    isCurrentUser: false
-  },
-  {
-    id: "2",
-    content: "I'm feeling much better, thank you. The medication you prescribed helped with the pain.",
-    sender: {
-      id: "patient-1",
-      name: "John Doe",
-      avatarUrl: "/placeholder.svg"
-    },
-    timestamp: new Date(Date.now() - 3500000).toISOString(), // 58 minutes ago
-    isCurrentUser: true
-  },
-  {
-    id: "3",
-    content: "That's great to hear! Have you been following the exercises we discussed?",
-    sender: {
-      id: "care-provider-1",
-      name: "Dr. Sarah Johnson",
-      avatarUrl: "/placeholder.svg"
-    },
-    timestamp: new Date(Date.now() - 3400000).toISOString(), // 56 minutes ago
-    isCurrentUser: false
-  },
-  {
-    id: "4",
-    content: "Yes, I've been doing them daily. The shoulder mobility has improved significantly.",
-    sender: {
-      id: "patient-1", 
-      name: "John Doe",
-      avatarUrl: "/placeholder.svg"
-    },
-    timestamp: new Date(Date.now() - 3300000).toISOString(), // 55 minutes ago
-    isCurrentUser: true
-  },
-  {
-    id: "5",
-    content: "Perfect! I'd like to do a quick follow-up appointment next week to check your progress. How does Tuesday at 2pm work?",
-    sender: {
-      id: "care-provider-1",
-      name: "Dr. Sarah Johnson",
-      avatarUrl: "/placeholder.svg"
-    },
-    timestamp: new Date(Date.now() - 3200000).toISOString(), // 53 minutes ago
-    isCurrentUser: false
-  }
-];
-
-const recipient = {
-  id: "care-provider-1",
-  name: "Dr. Sarah Johnson",
-  avatarUrl: "/placeholder.svg",
-  status: "online" as const
-};
-
 const ChatWindow: React.FC<ChatWindowProps> = ({ 
-  recipientId, 
-  currentUserId,
+  conversationId,
   showBackButton = false,
   onBack
 }) => {
-  const [messages, setMessages] = useState<MessageType[]>(mockMessages);
-  const [isLoading, setIsLoading] = useState(false);
+  const { 
+    conversations, 
+    messages, 
+    messagesLoading,
+    sendMessage
+  } = useChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+
+  const conversation = conversations.find(c => c.id === conversationId);
+  const recipient = conversation ? {
+    id: conversation.contactId,
+    name: conversation.contactName || 'Unknown User',
+    avatarUrl: conversation.contactAvatar,
+    status: conversation.contactStatus,
+    role: conversation.contactRole
+  } : null;
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -101,57 +46,39 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages]);
 
   const handleSendMessage = (content: string) => {
-    setIsLoading(true);
-    
-    // Create new message
-    const newMessage: MessageType = {
-      id: `${Date.now()}`,
-      content,
-      sender: {
-        id: currentUserId,
-        name: "John Doe",
-        avatarUrl: "/placeholder.svg"
-      },
-      timestamp: new Date().toISOString(),
-      isCurrentUser: true
-    };
-    
-    // Add to messages
-    setMessages(prev => [...prev, newMessage]);
-    
-    // Simulate server response
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // In a real app, this would be where you'd send the message to your backend
-      toast({
-        title: "Message sent",
-        description: "Your message has been successfully delivered.",
-      });
-      
-      // Simulate doctor response after a delay in this demo
-      if (content.toLowerCase().includes("appointment") || content.toLowerCase().includes("schedule")) {
-        setTimeout(() => {
-          const responseMessage: MessageType = {
-            id: `${Date.now() + 1}`,
-            content: "I'll check my calendar and confirm your appointment request. I'll get back to you shortly.",
-            sender: {
-              id: recipientId,
-              name: "Dr. Sarah Johnson",
-              avatarUrl: "/placeholder.svg"
-            },
-            timestamp: new Date().toISOString(),
-            isCurrentUser: false
-          };
-          
-          setMessages(prev => [...prev, responseMessage]);
-        }, 3000);
-      }
-    }, 1000);
+    if (content.trim() === '') return;
+    sendMessage(content);
   };
 
+  // Loading state
+  if (!recipient) {
+    return (
+      <div className="flex flex-col h-full glass bg-white/80 rounded-lg shadow-md overflow-hidden border border-care-border">
+        <div className="flex items-center justify-between border-b border-care-border p-3 h-16">
+          <div className="flex items-center">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="ml-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-16 mt-1" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex-1 p-4 bg-care-light">
+          <div className="flex justify-center items-center h-full">
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+        
+        <div className="border-t border-care-border p-4">
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-md overflow-hidden border border-care-border">
+    <div className="flex flex-col h-full glass bg-white/80 rounded-lg shadow-md overflow-hidden border border-care-border">
       <ChatHeader 
         recipient={recipient}
         showBackButton={showBackButton}
@@ -160,13 +87,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-care-light">
         <div className="space-y-4">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
+          {messagesLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className={`flex w-full mb-4 max-w-[85%] ${i % 2 === 0 ? 'mr-auto' : 'ml-auto'}`}>
+                {i % 2 === 0 && <Skeleton className="h-8 w-8 rounded-full mr-2" />}
+                <div className="flex-1">
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                </div>
+                {i % 2 !== 0 && <Skeleton className="h-8 w-8 rounded-full ml-2" />}
+              </div>
+            ))
+          ) : messages.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              <p>No messages yet</p>
+              <p className="text-sm">Send a message to start the conversation</p>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))
+          )}
         </div>
       </ScrollArea>
       
-      <ChatInput onSendMessage={handleSendMessage} disabled={isLoading} />
+      <ChatInput onSendMessage={handleSendMessage} disabled={messagesLoading} />
     </div>
   );
 };

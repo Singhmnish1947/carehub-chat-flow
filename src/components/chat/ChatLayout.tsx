@@ -1,69 +1,53 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatSidebar from "./ChatSidebar";
 import ChatWindow from "./ChatWindow";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
-
-// Mock data
-const mockContacts = [
-  {
-    id: "care-provider-1",
-    name: "Dr. Sarah Johnson",
-    avatarUrl: "/placeholder.svg",
-    lastMessage: "Perfect! I'd like to do a quick follow-up...",
-    timestamp: new Date(Date.now() - 3200000).toISOString(),
-    unread: 1,
-    status: "online" as const
-  },
-  {
-    id: "care-provider-2",
-    name: "Dr. Michael Chen",
-    avatarUrl: "/placeholder.svg",
-    lastMessage: "Your test results look good! Let me know if...",
-    timestamp: new Date(Date.now() - 86400000).toISOString(),
-    unread: 0,
-    status: "offline" as const
-  },
-  {
-    id: "care-provider-3",
-    name: "Nurse Emma Roberts",
-    avatarUrl: "/placeholder.svg",
-    lastMessage: "Don't forget to take your medication with...",
-    timestamp: new Date(Date.now() - 172800000).toISOString(),
-    unread: 0,
-    status: "busy" as const
-  },
-  {
-    id: "care-provider-4",
-    name: "Dr. Lisa Wong",
-    avatarUrl: "/placeholder.svg",
-    lastMessage: "How has your recovery been progressing?",
-    timestamp: new Date(Date.now() - 259200000).toISOString(),
-    unread: 0,
-    status: "offline" as const
-  },
-  {
-    id: "care-provider-5",
-    name: "Dr. James Martinez",
-    avatarUrl: "/placeholder.svg",
-    lastMessage: "I've updated your care plan. Please review...",
-    timestamp: new Date(Date.now() - 345600000).toISOString(),
-    unread: 0,
-    status: "offline" as const
-  }
-];
+import { useChat } from "@/hooks/use-chat";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ChatLayout: React.FC = () => {
   const isMobile = useIsMobile();
-  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { 
+    contacts, 
+    contactsLoading,
+    conversations, 
+    loading,
+    activeConversation, 
+    setActiveConversation,
+    createConversation
+  } = useChat();
+  
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
+  useEffect(() => {
+    // If we have conversations but no active conversation, set the first one as active
+    if (conversations?.length > 0 && !activeConversation) {
+      setActiveConversation(conversations[0].id);
+    }
+  }, [conversations, activeConversation, setActiveConversation]);
   
-  const currentUserId = "patient-1"; // In a real app, this would come from authentication
+  const handleSelectContact = async (contactId: string) => {
+    const conversationExists = conversations.find(c => 
+      c.participants.includes(contactId) && c.participants.length === 2
+    );
+    
+    if (conversationExists) {
+      setActiveConversation(conversationExists.id);
+    } else {
+      await createConversation(contactId);
+    }
+    
+    if (isMobile) {
+      setShowMobileSidebar(false);
+    }
+  };
   
-  const handleSelectContact = (contactId: string) => {
-    setSelectedContactId(contactId);
+  const handleSelectConversation = (conversationId: string) => {
+    setActiveConversation(conversationId);
     if (isMobile) {
       setShowMobileSidebar(false);
     }
@@ -78,19 +62,21 @@ const ChatLayout: React.FC = () => {
     // Mobile layout
     return (
       <div className="h-[calc(100vh-4rem)] bg-white">
-        {showMobileSidebar || !selectedContactId ? (
+        {showMobileSidebar || !activeConversation ? (
           <ChatSidebar 
-            contacts={mockContacts}
-            selectedContactId={selectedContactId}
+            contacts={contacts}
+            conversations={conversations}
+            activeConversationId={activeConversation}
             onSelectContact={handleSelectContact}
+            onSelectConversation={handleSelectConversation}
+            isLoading={loading || contactsLoading}
             isMobile={true}
-            onClose={selectedContactId ? () => setShowMobileSidebar(false) : undefined}
+            onClose={activeConversation ? () => setShowMobileSidebar(false) : undefined}
           />
         ) : (
           <div className="h-full flex flex-col">
             <ChatWindow 
-              recipientId={selectedContactId}
-              currentUserId={currentUserId}
+              conversationId={activeConversation}
               showBackButton={true}
               onBack={() => setShowMobileSidebar(true)}
             />
@@ -104,21 +90,23 @@ const ChatLayout: React.FC = () => {
   return (
     <div className="h-[calc(100vh-4rem)] flex bg-white rounded-lg shadow-lg overflow-hidden">
       <ChatSidebar 
-        contacts={mockContacts}
-        selectedContactId={selectedContactId}
+        contacts={contacts}
+        conversations={conversations}
+        activeConversationId={activeConversation}
         onSelectContact={handleSelectContact}
+        onSelectConversation={handleSelectConversation}
+        isLoading={loading || contactsLoading}
       />
       
-      {selectedContactId ? (
+      {activeConversation ? (
         <div className="flex-1">
           <ChatWindow 
-            recipientId={selectedContactId}
-            currentUserId={currentUserId}
+            conversationId={activeConversation}
           />
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center bg-care-light">
-          <div className="text-center p-6">
+          <div className="text-center p-6 glass-card">
             <div className="mx-auto w-16 h-16 bg-care-primary/10 rounded-full flex items-center justify-center mb-4">
               <MessageSquare size={32} className="text-care-primary" />
             </div>
