@@ -61,7 +61,7 @@ const ChatLayout: React.FC = () => {
   if (isMobile) {
     // Mobile layout
     return (
-      <div className="h-[calc(100vh-4rem)] bg-white rounded-lg shadow-md">
+      <div className="h-full bg-white rounded-lg shadow-sm">
         {showMobileSidebar || !activeConversation ? (
           <ChatSidebar 
             contacts={contacts}
@@ -88,7 +88,7 @@ const ChatLayout: React.FC = () => {
   
   // Desktop layout
   return (
-    <div className="h-[calc(100vh-4rem)] flex bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="h-full flex bg-white rounded-lg shadow-sm overflow-hidden">
       <ChatSidebar 
         contacts={contacts}
         conversations={conversations}
@@ -105,10 +105,10 @@ const ChatLayout: React.FC = () => {
           />
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center bg-blue-50">
-          <div className="text-center p-6 bg-white rounded-xl shadow-sm">
-            <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <MessageSquare size={32} className="text-blue-600" />
+        <div className="flex-1 flex items-center justify-center bg-gray-50">
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <MessageSquare size={32} className="text-gray-600" />
             </div>
             <h2 className="text-xl font-medium mb-2 text-gray-900">Select a conversation</h2>
             <p className="text-gray-600 max-w-sm">

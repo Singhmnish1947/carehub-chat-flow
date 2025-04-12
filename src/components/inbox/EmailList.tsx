@@ -46,8 +46,8 @@ const EmailList: React.FC<EmailListProps> = ({
             key={email.id}
             className={cn(
               "border-b p-4 cursor-pointer hover:bg-gray-50",
-              isSelected && "bg-care-primary/5 hover:bg-care-primary/5",
-              !email.read && "bg-blue-50 hover:bg-blue-100"
+              isSelected && "bg-gray-100 hover:bg-gray-100",
+              !email.read && "bg-gray-50"
             )}
             onClick={() => onSelectEmail(email)}
           >
@@ -71,7 +71,7 @@ const EmailList: React.FC<EmailListProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <p className={cn(
-                      "font-medium truncate",
+                      "font-medium truncate text-gray-900",
                       !email.read && "font-semibold"
                     )}>
                       {email.from.name}
@@ -82,7 +82,7 @@ const EmailList: React.FC<EmailListProps> = ({
                   </div>
                   
                   <h3 className={cn(
-                    "text-sm truncate mb-1",
+                    "text-sm truncate mb-1 text-gray-800",
                     !email.read && "font-medium"
                   )}>
                     {email.subject}
@@ -112,7 +112,7 @@ const EmailList: React.FC<EmailListProps> = ({
                   <DropdownMenuItem onClick={(e) => {
                     e.stopPropagation();
                     onDeleteEmail(email.id);
-                  }} className="text-red-600 focus:text-red-600">
+                  }} className="text-red-600 focus:bg-red-50">
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </DropdownMenuItem>

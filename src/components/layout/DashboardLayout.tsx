@@ -34,45 +34,31 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   href: string;
-  category?: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", category: "Main" },
-  { icon: CheckSquare, label: "Taskboard", href: "/taskboard", category: "Main" },
-  { icon: Mail, label: "Inbox", href: "/inbox", category: "Main" },
-  { icon: MessageSquare, label: "Chat", href: "/chat", category: "Main" },
-  { icon: Users, label: "Doctors", href: "/doctors", category: "People" },
-  { icon: Users, label: "Patients", href: "/patients", category: "People" },
-  { icon: Calendar, label: "Appointments", href: "/appointments", category: "Management" },
-  { icon: CreditCard, label: "Payments", href: "/payments", category: "Management" },
-  { icon: Building2, label: "Departments", href: "/departments", category: "Facility" },
-  { icon: MapPin, label: "Locations", href: "/locations", category: "Facility" },
-  { icon: Pill, label: "Medication", href: "/medication", category: "Medical" },
-  { icon: BedDouble, label: "Rooms & Beds", href: "/rooms", category: "Facility" },
-  { icon: UserCog, label: "Staff", href: "/staff", category: "People" },
-  { icon: Package, label: "Inventory", href: "/inventory", category: "Management" },
-  { icon: Settings, label: "Settings", href: "/settings", category: "System" },
-  { icon: Bot, label: "AI Chatbot", href: "/ai-chatbot", category: "System" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: CheckSquare, label: "Taskboard", href: "/taskboard" },
+  { icon: Mail, label: "Inbox", href: "/inbox" },
+  { icon: MessageSquare, label: "Chat", href: "/chat" },
+  { icon: Users, label: "Doctors", href: "/doctors" },
+  { icon: Users, label: "Patients", href: "/patients" },
+  { icon: Calendar, label: "Appointments", href: "/appointments" },
+  { icon: CreditCard, label: "Payments", href: "/payments" },
+  { icon: Building2, label: "Departments", href: "/departments" },
+  { icon: MapPin, label: "Locations", href: "/locations" },
+  { icon: Pill, label: "Medication", href: "/medication" },
+  { icon: BedDouble, label: "Rooms & Beds", href: "/rooms" },
+  { icon: UserCog, label: "Staff", href: "/staff" },
+  { icon: Package, label: "Inventory", href: "/inventory" },
+  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: Bot, label: "AI Chatbot", href: "/ai-chatbot" },
 ];
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Group items by category
-  const groupedNavItems = navItems.reduce((acc, item) => {
-    const category = item.category || "Other";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {} as Record<string, NavItem[]>);
-
-  // Order of categories
-  const categoryOrder = ["Main", "People", "Management", "Facility", "Medical", "System"];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -89,41 +75,32 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </Link>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {categoryOrder.map((category) => (
-            groupedNavItems[category] && (
-              <div key={category} className="mb-4">
-                <div className="px-3 py-2">
-                  <p className="text-xs font-medium text-gray-500 uppercase">{category}</p>
-                </div>
-                <nav className="space-y-1">
-                  {groupedNavItems[category].map((item) => (
-                    <Link 
-                      key={item.href}
-                      to={item.href} 
-                      className={cn(
-                        "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                        location.pathname === item.href 
-                          ? "bg-black text-white" 
-                          : "text-gray-700 hover:bg-gray-100"
-                      )}
-                    >
-                      <item.icon size={18} />
-                      <span>{item.label}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            )
-          ))}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          <nav className="space-y-1">
+            {navItems.map((item) => (
+              <Link 
+                key={item.href}
+                to={item.href} 
+                className={cn(
+                  "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname === item.href 
+                    ? "bg-black text-white" 
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                <item.icon size={18} />
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </nav>
         </div>
         
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center space-x-3">
             <Avatar>
               <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback className="bg-blue-600 text-white">
-                JD
+              <AvatarFallback className="bg-gray-700 text-white">
+                JC
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -193,40 +170,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </Button>
               </div>
               
-              {categoryOrder.map((category) => (
-                groupedNavItems[category] && (
-                  <div key={category} className="mt-5">
-                    <div className="px-4 py-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase">{category}</p>
-                    </div>
-                    <nav className="px-2 space-y-1">
-                      {groupedNavItems[category].map((item) => (
-                        <Link 
-                          key={item.href}
-                          to={item.href} 
-                          className={cn(
-                            "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                            location.pathname === item.href 
-                              ? "bg-black text-white" 
-                              : "text-gray-700 hover:bg-gray-100"
-                          )}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <item.icon size={18} />
-                          <span>{item.label}</span>
-                        </Link>
-                      ))}
-                    </nav>
-                  </div>
-                )
-              ))}
+              <nav className="px-2 mt-5 space-y-1">
+                {navItems.map((item) => (
+                  <Link 
+                    key={item.href}
+                    to={item.href} 
+                    className={cn(
+                      "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                      location.pathname === item.href 
+                        ? "bg-black text-white" 
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <item.icon size={18} />
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
             </div>
             <div className="border-t border-gray-200 p-4">
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-blue-600 text-white">
-                    JD
+                  <AvatarFallback className="bg-gray-700 text-white">
+                    JC
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
@@ -259,8 +227,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <div className="flex items-center space-x-3">
               <Avatar>
                 <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-blue-600 text-white">
-                  JD
+                <AvatarFallback className="bg-gray-700 text-white">
+                  JC
                 </AvatarFallback>
               </Avatar>
               <div>

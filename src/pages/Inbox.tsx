@@ -9,17 +9,9 @@ import {
   Send, 
   Archive, 
   Trash2, 
-  Star,
   Loader2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import EmailList from "@/components/inbox/EmailList";
 import EmailView from "@/components/inbox/EmailView";
 import ComposeDialog from "@/components/inbox/ComposeDialog";
@@ -177,13 +169,13 @@ const Inbox = () => {
     <DashboardLayout>
       <div className="h-full flex flex-col">
         <div className="border-b p-4 flex items-center justify-between bg-white">
-          <h1 className="text-2xl font-bold text-care-dark">Inbox</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Inbox</h1>
           <Button 
             onClick={() => {
               setReplyToEmail(null);
               setIsComposeOpen(true);
             }}
-            className="bg-care-primary hover:bg-care-dark"
+            className="bg-black hover:bg-gray-800 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Compose
@@ -196,7 +188,7 @@ const Inbox = () => {
             <div className="p-4">
               <Button 
                 variant="outline" 
-                className="w-full flex justify-start" 
+                className="w-full flex justify-start border-gray-200" 
                 onClick={() => {
                   setReplyToEmail(null);
                   setIsComposeOpen(true);
@@ -219,14 +211,14 @@ const Inbox = () => {
                     }}
                     className={`w-full flex items-center px-3 py-2 my-1 rounded text-left ${
                       currentFolder === folder.value 
-                        ? "bg-care-primary/10 text-care-primary" 
+                        ? "bg-gray-200 text-gray-900" 
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
-                    <Icon className={`h-4 w-4 mr-3 ${currentFolder === folder.value ? "text-care-primary" : ""}`} />
+                    <Icon className={`h-4 w-4 mr-3 ${currentFolder === folder.value ? "text-gray-900" : "text-gray-500"}`} />
                     {folder.label}
                     {folder.value === "inbox" && unreadCount > 0 && (
-                      <span className="ml-auto bg-care-primary text-white text-xs rounded-full px-2 py-0.5">
+                      <span className="ml-auto bg-black text-white text-xs rounded-full px-2 py-0.5">
                         {unreadCount}
                       </span>
                     )}
@@ -247,7 +239,7 @@ const Inbox = () => {
                     placeholder="Search emails..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-gray-200"
                   />
                 </div>
               </div>
@@ -275,20 +267,20 @@ const Inbox = () => {
                 />
               </div>
             ) : (
-              <div className="hidden md:flex flex-1 items-center justify-center bg-blue-50">
+              <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
                 <div className="text-center p-6">
-                  <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     {currentFolder === "inbox" ? (
-                      <InboxIcon size={32} className="text-blue-600" />
+                      <InboxIcon size={32} className="text-gray-600" />
                     ) : currentFolder === "sent" ? (
-                      <Send size={32} className="text-blue-600" />
+                      <Send size={32} className="text-gray-600" />
                     ) : currentFolder === "archive" ? (
-                      <Archive size={32} className="text-blue-600" />
+                      <Archive size={32} className="text-gray-600" />
                     ) : (
-                      <Trash2 size={32} className="text-blue-600" />
+                      <Trash2 size={32} className="text-gray-600" />
                     )}
                   </div>
-                  <h2 className="text-xl font-medium mb-2">No email selected</h2>
+                  <h2 className="text-xl font-medium mb-2 text-gray-900">No email selected</h2>
                   <p className="text-gray-500 max-w-sm">
                     Select an email from the list to view its contents
                   </p>
