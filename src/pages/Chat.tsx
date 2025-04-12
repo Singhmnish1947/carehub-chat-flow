@@ -7,8 +7,8 @@ const Chat = () => {
   return (
     <DashboardLayout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-care-dark">Messages</h1>
-        <p className="text-gray-500">Connect with your healthcare team</p>
+        <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+        <p className="text-gray-600">Connect with your healthcare team</p>
       </div>
       
       <div className="h-[calc(100vh-16rem)]">

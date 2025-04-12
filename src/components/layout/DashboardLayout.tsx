@@ -34,31 +34,45 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   href: string;
+  category?: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: CheckSquare, label: "Taskboard", href: "/taskboard" },
-  { icon: Mail, label: "Inbox", href: "/inbox" },
-  { icon: MessageSquare, label: "Chat", href: "/chat" },
-  { icon: Users, label: "Doctors", href: "/doctors" },
-  { icon: Users, label: "Patients", href: "/patients" },
-  { icon: Calendar, label: "Appointments", href: "/appointments" },
-  { icon: CreditCard, label: "Payments", href: "/payments" },
-  { icon: Building2, label: "Departments", href: "/departments" },
-  { icon: MapPin, label: "Locations", href: "/locations" },
-  { icon: Pill, label: "Medication", href: "/medication" },
-  { icon: BedDouble, label: "Rooms & Beds", href: "/rooms" },
-  { icon: UserCog, label: "Staff", href: "/staff" },
-  { icon: Package, label: "Inventory", href: "/inventory" },
-  { icon: Settings, label: "Settings", href: "/settings" },
-  { icon: Bot, label: "AI Chatbot", href: "/ai-chatbot" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", category: "Main" },
+  { icon: CheckSquare, label: "Taskboard", href: "/taskboard", category: "Main" },
+  { icon: Mail, label: "Inbox", href: "/inbox", category: "Main" },
+  { icon: MessageSquare, label: "Chat", href: "/chat", category: "Main" },
+  { icon: Users, label: "Doctors", href: "/doctors", category: "People" },
+  { icon: Users, label: "Patients", href: "/patients", category: "People" },
+  { icon: Calendar, label: "Appointments", href: "/appointments", category: "Management" },
+  { icon: CreditCard, label: "Payments", href: "/payments", category: "Management" },
+  { icon: Building2, label: "Departments", href: "/departments", category: "Facility" },
+  { icon: MapPin, label: "Locations", href: "/locations", category: "Facility" },
+  { icon: Pill, label: "Medication", href: "/medication", category: "Medical" },
+  { icon: BedDouble, label: "Rooms & Beds", href: "/rooms", category: "Facility" },
+  { icon: UserCog, label: "Staff", href: "/staff", category: "People" },
+  { icon: Package, label: "Inventory", href: "/inventory", category: "Management" },
+  { icon: Settings, label: "Settings", href: "/settings", category: "System" },
+  { icon: Bot, label: "AI Chatbot", href: "/ai-chatbot", category: "System" },
 ];
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Group items by category
+  const groupedNavItems = navItems.reduce((acc, item) => {
+    const category = item.category || "Other";
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {} as Record<string, NavItem[]>);
+
+  // Order of categories
+  const categoryOrder = ["Main", "People", "Management", "Facility", "Medical", "System"];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -71,69 +85,54 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               alt="HavenMed Logo" 
               className="h-8 w-8" 
             />
-            <h1 className="text-xl font-bold text-care-dark">HavenMed</h1>
+            <h1 className="text-xl font-bold text-gray-900">HavenMed</h1>
           </Link>
         </div>
         
-        <div className="px-4 py-3 border-b border-gray-200">
-          <p className="text-xs font-medium text-gray-500 uppercase">Main Menu</p>
-        </div>
-        
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-          {navItems.slice(0, 6).map((item) => (
-            <Link 
-              key={item.href}
-              to={item.href} 
-              className={cn(
-                "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname === item.href 
-                  ? "bg-black text-white" 
-                  : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </Link>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {categoryOrder.map((category) => (
+            groupedNavItems[category] && (
+              <div key={category} className="mb-4">
+                <div className="px-3 py-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase">{category}</p>
+                </div>
+                <nav className="space-y-1">
+                  {groupedNavItems[category].map((item) => (
+                    <Link 
+                      key={item.href}
+                      to={item.href} 
+                      className={cn(
+                        "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        location.pathname === item.href 
+                          ? "bg-black text-white" 
+                          : "text-gray-700 hover:bg-gray-100"
+                      )}
+                    >
+                      <item.icon size={18} />
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            )
           ))}
-        </nav>
-        
-        <div className="px-4 py-3 border-b border-t border-gray-200">
-          <p className="text-xs font-medium text-gray-500 uppercase">Other Menu</p>
         </div>
-        
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-          {navItems.slice(6).map((item) => (
-            <Link 
-              key={item.href}
-              to={item.href} 
-              className={cn(
-                "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname === item.href 
-                  ? "bg-black text-white" 
-                  : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
         
         <div className="p-4 border-t border-gray-200">
-          <div className="px-4 py-3">
-            <p className="text-xs font-medium text-gray-500">Help</p>
-          </div>
           <div className="flex items-center space-x-3">
             <Avatar>
               <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback className="bg-care-primary text-white">
+              <AvatarFallback className="bg-blue-600 text-white">
                 JD
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm">Help Center</p>
-              <p className="text-xs text-gray-500 truncate">Get help with HavenMed</p>
+              <p className="font-medium text-sm text-gray-900">Jack Chain</p>
+              <p className="text-xs text-gray-500 truncate">Super admin</p>
             </div>
+            <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700">
+              <Settings size={18} />
+            </Button>
           </div>
         </div>
       </aside>
@@ -146,7 +145,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             alt="HavenMed Logo" 
             className="h-8 w-8" 
           />
-          <h1 className="text-xl font-bold text-care-dark">HavenMed</h1>
+          <h1 className="text-xl font-bold text-gray-900">HavenMed</h1>
         </div>
         
         <Button 
@@ -156,11 +155,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         >
           <span className="sr-only">Open main menu</span>
           {isMobileMenuOpen ? (
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-6 w-6 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-6 w-6 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
@@ -180,7 +179,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     alt="HavenMed Logo" 
                     className="h-8 w-8" 
                   />
-                  <h1 className="text-xl font-bold text-care-dark">HavenMed</h1>
+                  <h1 className="text-xl font-bold text-gray-900">HavenMed</h1>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -188,68 +187,51 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <span className="sr-only">Close menu</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </Button>
               </div>
-              <div className="px-4 py-3 border-b border-gray-200">
-                <p className="text-xs font-medium text-gray-500 uppercase">Main Menu</p>
-              </div>
-              <nav className="mt-5 px-2 space-y-1">
-                {navItems.slice(0, 6).map((item) => (
-                  <Link 
-                    key={item.href}
-                    to={item.href} 
-                    className={cn(
-                      "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                      location.pathname === item.href 
-                        ? "bg-black text-white" 
-                        : "text-gray-700 hover:bg-gray-100"
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <item.icon size={18} />
-                    <span>{item.label}</span>
-                  </Link>
-                ))}
-              </nav>
-              <div className="px-4 py-3 border-b border-t border-gray-200">
-                <p className="text-xs font-medium text-gray-500 uppercase">Other Menu</p>
-              </div>
-              <nav className="px-2 space-y-1">
-                {navItems.slice(6).map((item) => (
-                  <Link 
-                    key={item.href}
-                    to={item.href} 
-                    className={cn(
-                      "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                      location.pathname === item.href 
-                        ? "bg-black text-white" 
-                        : "text-gray-700 hover:bg-gray-100"
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <item.icon size={18} />
-                    <span>{item.label}</span>
-                  </Link>
-                ))}
-              </nav>
+              
+              {categoryOrder.map((category) => (
+                groupedNavItems[category] && (
+                  <div key={category} className="mt-5">
+                    <div className="px-4 py-2">
+                      <p className="text-xs font-medium text-gray-500 uppercase">{category}</p>
+                    </div>
+                    <nav className="px-2 space-y-1">
+                      {groupedNavItems[category].map((item) => (
+                        <Link 
+                          key={item.href}
+                          to={item.href} 
+                          className={cn(
+                            "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                            location.pathname === item.href 
+                              ? "bg-black text-white" 
+                              : "text-gray-700 hover:bg-gray-100"
+                          )}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <item.icon size={18} />
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                )
+              ))}
             </div>
             <div className="border-t border-gray-200 p-4">
-              <div className="px-4 py-2">
-                <p className="text-xs font-medium text-gray-500">Help</p>
-              </div>
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-care-primary text-white">
+                  <AvatarFallback className="bg-blue-600 text-white">
                     JD
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">Help Center</p>
-                  <p className="text-xs text-gray-500 truncate">Get help with HavenMed</p>
+                  <p className="font-medium text-sm text-gray-900">Jack Chain</p>
+                  <p className="text-xs text-gray-500 truncate">Super admin</p>
                 </div>
               </div>
             </div>
@@ -268,21 +250,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             />
           </div>
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" className="rounded-full">
+            <Button variant="outline" size="sm" className="rounded-full text-gray-700 border-gray-300">
               <Plus size={16} className="mr-1" /> Add
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full text-gray-700">
               <Bell size={20} />
             </Button>
             <div className="flex items-center space-x-3">
               <Avatar>
                 <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-care-primary text-white">
+                <AvatarFallback className="bg-blue-600 text-white">
                   JD
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-medium">Jack Chain</p>
+                <p className="text-sm font-medium text-gray-900">Jack Chain</p>
                 <p className="text-xs text-gray-500">Super admin</p>
               </div>
             </div>
