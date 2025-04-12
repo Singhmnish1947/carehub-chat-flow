@@ -11,6 +11,7 @@ import Chat from "./pages/Chat";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Create placeholder pages for all the required routes
 import Taskboard from "./pages/Taskboard";
@@ -27,6 +28,7 @@ import Staff from "./pages/Staff";
 import Inventory from "./pages/Inventory";
 import Settings from "./pages/Settings";
 import AIChatbot from "./pages/AIChatbot";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Create a new QueryClient instance before rendering
 const queryClient = new QueryClient();
@@ -34,35 +36,105 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/taskboard" element={<Taskboard />} />
-            <Route path="/inbox" element={<Inbox />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/doctors" element={<Doctors />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/appointments" element={<Appointments />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/departments" element={<Departments />} />
-            <Route path="/locations" element={<Locations />} />
-            <Route path="/medication" element={<Medication />} />
-            <Route path="/rooms" element={<Rooms />} />
-            <Route path="/staff" element={<Staff />} />
-            <Route path="/inventory" element={<Inventory />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/ai-chatbot" element={<AIChatbot />} />
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              
+              {/* Protected routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/taskboard" element={
+                <ProtectedRoute>
+                  <Taskboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/inbox" element={
+                <ProtectedRoute>
+                  <Inbox />
+                </ProtectedRoute>
+              } />
+              <Route path="/chat" element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              } />
+              <Route path="/doctors" element={
+                <ProtectedRoute>
+                  <Doctors />
+                </ProtectedRoute>
+              } />
+              <Route path="/patients" element={
+                <ProtectedRoute>
+                  <Patients />
+                </ProtectedRoute>
+              } />
+              <Route path="/appointments" element={
+                <ProtectedRoute>
+                  <Appointments />
+                </ProtectedRoute>
+              } />
+              <Route path="/payments" element={
+                <ProtectedRoute>
+                  <Payments />
+                </ProtectedRoute>
+              } />
+              <Route path="/departments" element={
+                <ProtectedRoute>
+                  <Departments />
+                </ProtectedRoute>
+              } />
+              <Route path="/locations" element={
+                <ProtectedRoute>
+                  <Locations />
+                </ProtectedRoute>
+              } />
+              <Route path="/medication" element={
+                <ProtectedRoute>
+                  <Medication />
+                </ProtectedRoute>
+              } />
+              <Route path="/rooms" element={
+                <ProtectedRoute>
+                  <Rooms />
+                </ProtectedRoute>
+              } />
+              <Route path="/staff" element={
+                <ProtectedRoute>
+                  <Staff />
+                </ProtectedRoute>
+              } />
+              <Route path="/inventory" element={
+                <ProtectedRoute>
+                  <Inventory />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="/ai-chatbot" element={
+                <ProtectedRoute>
+                  <AIChatbot />
+                </ProtectedRoute>
+              } />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

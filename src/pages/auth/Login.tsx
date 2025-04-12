@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,15 +7,24 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Facebook, Loader2, Mail } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,27 +36,21 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simulated login for demo purposes
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await signIn(formData.email, formData.password);
       
-      // For demo, hardcoded credentials check
-      if (formData.email === "doctor@carehub.com" && formData.password === "password") {
-        toast({
-          title: "Login Successful",
-          description: "Welcome back to CareHub!",
-        });
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive",
-        });
+      if (error) {
+        throw error;
       }
-    } catch (error) {
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to AssistMed!",
+      });
+      navigate("/dashboard");
+    } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: "An error occurred. Please try again later.",
+        description: error.message || "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -76,21 +80,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-950">
       <div className="max-w-md w-full">
         <div className="text-center mb-6">
           <div className="flex justify-center mb-2">
             <img 
               src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-              alt="CareHub Logo" 
+              alt="AssistMed Logo" 
               className="h-12 w-12" 
             />
           </div>
-          <h1 className="text-2xl font-bold text-care-dark">CareHub</h1>
-          <p className="text-gray-500">Hospital Management System</p>
+          <h1 className="text-2xl font-bold text-indigo-800 dark:text-indigo-400">AssistMed</h1>
+          <p className="text-gray-500 dark:text-gray-400">Hospital Management System</p>
         </div>
 
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
             <CardDescription>Enter your credentials to access your account</CardDescription>
@@ -103,17 +107,18 @@ const Login = () => {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="doctor@carehub.com"
+                  placeholder="doctor@assistmed.com"
                   required
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
+                  className="glass-input"
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Link to="/forgot-password" className="text-xs text-care-primary hover:underline">
+                  <Link to="/forgot-password" className="text-xs text-indigo-600 hover:underline dark:text-indigo-400">
                     Forgot password?
                   </Link>
                 </div>
@@ -126,11 +131,12 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   disabled={isLoading}
+                  className="glass-input"
                 />
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-care-primary hover:bg-care-dark"
+                className="w-full glass-button bg-indigo-600 hover:bg-indigo-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -146,10 +152,10 @@ const Login = () => {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500 dark:bg-gray-800 dark:text-gray-400">Or continue with</span>
               </div>
             </div>
 
@@ -158,7 +164,7 @@ const Login = () => {
                 variant="outline"
                 onClick={() => handleOAuthLogin("Google")}
                 disabled={isLoading}
-                className="w-full"
+                className="w-full glass-button"
               >
                 <Mail className="mr-2 h-4 w-4" />
                 Google
@@ -167,7 +173,7 @@ const Login = () => {
                 variant="outline"
                 onClick={() => handleOAuthLogin("Facebook")}
                 disabled={isLoading}
-                className="w-full"
+                className="w-full glass-button"
               >
                 <Facebook className="mr-2 h-4 w-4 text-blue-600" />
                 Facebook
@@ -175,17 +181,17 @@ const Login = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <p className="text-sm text-gray-500 text-center w-full">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center w-full">
               Don't have an account?{" "}
-              <Link to="/register" className="text-care-primary hover:underline">
+              <Link to="/register" className="text-indigo-600 hover:underline dark:text-indigo-400">
                 Sign up
               </Link>
             </p>
           </CardFooter>
         </Card>
 
-        <div className="mt-6 text-center text-xs text-gray-500">
-          <p>For demo login, use: doctor@carehub.com / password</p>
+        <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p>For demo login, use: doctor@assistmed.com / password</p>
         </div>
       </div>
     </div>
