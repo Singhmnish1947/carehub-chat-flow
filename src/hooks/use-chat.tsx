@@ -101,29 +101,39 @@ export const useChat = () => {
       
       setLoading(true);
       try {
-        // In the new schema, participants is an array of strings
-        const { data, error } = await supabase
+        // Get all conversations where the current user is a participant
+        const { data: conversationsData, error: conversationsError } = await supabase
           .from('conversations')
           .select('*')
           .contains('participants', [user.id])
           .order('updated_at', { ascending: false });
           
-        if (error) {
-          throw error;
+        if (conversationsError) {
+          throw conversationsError;
         }
         
-        if (data) {
-          const formattedConversations: Conversation[] = await Promise.all(data.map(async (convo) => {
+        if (conversationsData) {
+          const formattedConversations: Conversation[] = await Promise.all(conversationsData.map(async (convo) => {
             // Find the other participant
             const otherParticipantId = convo.participants.find(id => id !== user.id);
             
             // Get the other participant's profile
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', otherParticipantId)
-              .single();
-              
+            let contactName = 'Unknown User';
+            let contactRole = '';
+            
+            if (otherParticipantId) {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', otherParticipantId)
+                .single();
+                
+              if (profileData) {
+                contactName = profileData.full_name || 'Unknown User';
+                contactRole = profileData.role || '';
+              }
+            }
+            
             // Get unread count
             const { data: unreadMessages, error: unreadError } = await supabase
               .from('messages')
@@ -138,9 +148,9 @@ export const useChat = () => {
               id: convo.id,
               participants: convo.participants,
               contactId: otherParticipantId,
-              contactName: profileData?.full_name || 'Unknown User',
+              contactName: contactName,
               contactAvatar: '/placeholder.svg',
-              contactRole: profileData?.role,
+              contactRole: contactRole,
               contactStatus: Math.random() > 0.7 ? 'online' : Math.random() > 0.5 ? 'busy' : 'offline',
               lastMessage: convo.last_message || '',
               lastMessageTimestamp: convo.last_message_timestamp || convo.created_at,
@@ -188,35 +198,56 @@ export const useChat = () => {
       
       setMessagesLoading(true);
       try {
-        const { data, error } = await supabase
+        // First get all messages for this conversation
+        const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
-          .select('*, sender:profiles!sender_id(*)')
+          .select('*')
           .eq('conversation_id', activeConversation)
           .order('created_at', { ascending: true });
           
-        if (error) {
-          throw error;
+        if (messagesError) {
+          throw messagesError;
         }
         
-        if (data) {
-          const formattedMessages: Message[] = data.map(msg => ({
-            id: msg.id,
-            conversationId: msg.conversation_id,
-            content: msg.content,
-            sender: {
-              id: msg.sender_id,
-              name: msg.sender?.full_name || 'Unknown User',
-              avatarUrl: '/placeholder.svg',
-            },
-            timestamp: msg.created_at,
-            isCurrentUser: msg.sender_id === user.id,
-            isRead: msg.is_read,
+        // Format messages with sender information
+        if (messagesData) {
+          const formattedMessages: Message[] = await Promise.all(messagesData.map(async (msg) => {
+            // Get sender profile
+            let senderName = 'Unknown User';
+            
+            if (msg.sender_id === user.id) {
+              senderName = user.user_metadata?.full_name || 'You';
+            } else {
+              const { data: senderData } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', msg.sender_id)
+                .single();
+                
+              if (senderData) {
+                senderName = senderData.full_name || 'Unknown User';
+              }
+            }
+            
+            return {
+              id: msg.id,
+              conversationId: msg.conversation_id,
+              content: msg.content,
+              sender: {
+                id: msg.sender_id,
+                name: senderName,
+                avatarUrl: '/placeholder.svg',
+              },
+              timestamp: msg.created_at,
+              isCurrentUser: msg.sender_id === user.id,
+              isRead: msg.is_read,
+            };
           }));
           
           setMessages(formattedMessages);
           
           // Mark unread messages as read
-          const unreadMessages = data.filter(msg => !msg.is_read && msg.sender_id !== user.id);
+          const unreadMessages = messagesData.filter(msg => !msg.is_read && msg.sender_id !== user.id);
           if (unreadMessages.length > 0) {
             await supabase
               .from('messages')
