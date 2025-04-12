@@ -33,6 +33,11 @@ export type Message = {
 export type Conversation = {
   id: string;
   participants: string[];
+  contactId?: string;
+  contactName?: string;
+  contactAvatar?: string;
+  contactStatus?: "online" | "offline" | "busy";
+  contactRole?: string;
   lastMessage?: string;
   lastMessageTimestamp?: string;
   unreadCount?: number;
@@ -96,9 +101,10 @@ export const useChat = () => {
       
       setLoading(true);
       try {
+        // In the new schema, participants is an array of strings
         const { data, error } = await supabase
           .from('conversations')
-          .select('*, messages(*)')
+          .select('*')
           .contains('participants', [user.id])
           .order('updated_at', { ascending: false });
           
@@ -118,25 +124,26 @@ export const useChat = () => {
               .eq('id', otherParticipantId)
               .single();
               
-            // Calculate unread count
-            const unreadCount = convo.messages
-              ? convo.messages.filter(msg => !msg.is_read && msg.sender_id !== user.id).length
-              : 0;
+            // Get unread count
+            const { data: unreadMessages, error: unreadError } = await supabase
+              .from('messages')
+              .select('id')
+              .eq('conversation_id', convo.id)
+              .eq('is_read', false)
+              .neq('sender_id', user.id);
               
-            // Find last message
-            const lastMsg = convo.messages && convo.messages.length > 0
-              ? convo.messages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-              : null;
+            const unreadCount = unreadMessages?.length || 0;
               
             return {
               id: convo.id,
               participants: convo.participants,
-              contactName: profileData?.full_name || 'Unknown User',
               contactId: otherParticipantId,
+              contactName: profileData?.full_name || 'Unknown User',
               contactAvatar: '/placeholder.svg',
               contactRole: profileData?.role,
-              lastMessage: lastMsg?.content || '',
-              lastMessageTimestamp: lastMsg?.created_at || convo.created_at,
+              contactStatus: Math.random() > 0.7 ? 'online' : Math.random() > 0.5 ? 'busy' : 'offline',
+              lastMessage: convo.last_message || '',
+              lastMessageTimestamp: convo.last_message_timestamp || convo.created_at,
               unreadCount,
             };
           }));
@@ -276,6 +283,7 @@ export const useChat = () => {
         .from('conversations')
         .update({
           last_message: content,
+          last_message_timestamp: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', activeConversation);
