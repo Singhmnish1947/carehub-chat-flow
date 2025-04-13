@@ -15,7 +15,6 @@ import {
   Package, 
   Settings, 
   Bot, 
-  Mail, 
   CheckSquare,
   Search,
   Bell,
@@ -39,7 +38,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: CheckSquare, label: "Taskboard", href: "/taskboard" },
-  { icon: Mail, label: "Inbox", href: "/inbox" },
   { icon: MessageSquare, label: "Chat", href: "/chat" },
   { icon: Users, label: "Doctors", href: "/doctors" },
   { icon: Users, label: "Patients", href: "/patients" },

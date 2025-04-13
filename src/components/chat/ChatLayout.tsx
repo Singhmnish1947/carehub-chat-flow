@@ -6,11 +6,20 @@ import ChatWindow from "./ChatWindow";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { useChat } from "@/hooks/use-chat";
+import { useChatLocal } from "@/hooks/use-chat-local";
 import { useAuth } from "@/contexts/AuthContext";
 
-const ChatLayout: React.FC = () => {
+interface ChatLayoutProps {
+  useLocalData?: boolean;
+}
+
+const ChatLayout: React.FC<ChatLayoutProps> = ({ useLocalData = false }) => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  
+  // Choose which hook to use based on prop
+  const chatHook = useLocalData ? useChatLocal() : useChat();
+  
   const { 
     contacts, 
     contactsLoading,
@@ -19,7 +28,7 @@ const ChatLayout: React.FC = () => {
     activeConversation, 
     setActiveConversation,
     createConversation
-  } = useChat();
+  } = chatHook;
   
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
@@ -79,6 +88,7 @@ const ChatLayout: React.FC = () => {
               conversationId={activeConversation}
               showBackButton={true}
               onBack={() => setShowMobileSidebar(true)}
+              useLocalData={useLocalData}
             />
           </div>
         )}
@@ -102,6 +112,7 @@ const ChatLayout: React.FC = () => {
         <div className="flex-1">
           <ChatWindow 
             conversationId={activeConversation}
+            useLocalData={useLocalData}
           />
         </div>
       ) : (

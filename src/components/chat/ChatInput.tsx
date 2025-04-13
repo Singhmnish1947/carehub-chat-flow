@@ -29,7 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
   return (
     <form 
       onSubmit={handleSubmit}
-      className="border-t border-care-border glass-navbar p-4 sticky bottom-0 w-full"
+      className="border-t border-gray-200 bg-white p-4 sticky bottom-0 w-full"
     >
       <div className="flex items-center gap-2">
         <DropdownMenu>
@@ -38,14 +38,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
               type="button"
               size="icon"
               variant="ghost"
-              className="text-gray-500 hover:text-care-dark"
+              className="text-gray-500 hover:text-gray-700"
               disabled={disabled}
             >
               <Paperclip size={20} />
               <span className="sr-only">Attach file</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="glass">
+          <DropdownMenuContent>
             <DropdownMenuItem>
               <File className="mr-2 h-4 w-4" />
               Document
@@ -70,14 +70,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your message..."
-            className="pr-10 glass-input focus-visible:ring-care-primary"
+            className="pr-10 focus-visible:ring-black"
             disabled={disabled}
           />
           <Button
             type="button"
             size="icon"
             variant="ghost"
-            className="absolute right-0 top-0 h-full text-gray-500 hover:text-care-dark"
+            className="absolute right-0 top-0 h-full text-gray-500 hover:text-gray-700"
             disabled={disabled}
           >
             <Smile size={20} />
@@ -89,7 +89,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
           type="button"
           size="icon"
           variant="ghost"
-          className="text-gray-500 hover:text-care-dark"
+          className="text-gray-500 hover:text-gray-700"
           disabled={disabled}
         >
           <Mic size={20} />
@@ -99,7 +99,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled = false }
         <Button 
           type="submit" 
           size="icon" 
-          className="glass-button bg-care-primary hover:bg-care-dark text-white"
+          className="bg-black hover:bg-gray-800 text-white"
           disabled={disabled || message.trim() === ""}
         >
           <Send size={20} />

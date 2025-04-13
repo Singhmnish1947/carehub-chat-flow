@@ -5,30 +5,37 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/hooks/use-chat";
+import { useChatLocal } from "@/hooks/use-chat-local";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChatWindowProps {
   conversationId: string;
   showBackButton?: boolean;
   onBack?: () => void;
+  useLocalData?: boolean;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ 
   conversationId,
   showBackButton = false,
-  onBack
+  onBack,
+  useLocalData = false
 }) => {
+  // Choose which hook to use based on prop
+  const chatHook = useLocalData ? useChatLocal() : useChat();
+  
   const { 
     conversations, 
     messages, 
     messagesLoading,
     sendMessage
-  } = useChat();
+  } = chatHook;
+  
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const conversation = conversations.find(c => c.id === conversationId);
   const recipient = conversation ? {
-    id: conversation.contactId,
+    id: conversation.contactId || '',
     name: conversation.contactName || 'Unknown User',
     avatarUrl: conversation.contactAvatar,
     status: conversation.contactStatus,
@@ -64,13 +71,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
         </div>
         
-        <div className="flex-1 p-4 bg-care-light">
+        <div className="flex-1 p-4 bg-gray-50">
           <div className="flex justify-center items-center h-full">
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
         
-        <div className="border-t border-care-border p-4">
+        <div className="border-t border-gray-200 p-4">
           <Skeleton className="h-10 w-full" />
         </div>
       </div>
@@ -78,14 +85,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full glass bg-white/80 rounded-lg shadow-md overflow-hidden border border-care-border">
+    <div className="flex flex-col h-full glass bg-white/80 rounded-lg shadow-md overflow-hidden border border-gray-200">
       <ChatHeader 
         recipient={recipient}
         showBackButton={showBackButton}
         onBack={onBack}
       />
       
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-care-light">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-gray-50">
         <div className="space-y-4">
           {messagesLoading ? (
             Array.from({ length: 5 }).map((_, i) => (

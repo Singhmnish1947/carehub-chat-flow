@@ -37,7 +37,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div className="flex-shrink-0 mr-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={sender.avatarUrl} alt={sender.name} />
-            <AvatarFallback className="bg-care-primary text-white">
+            <AvatarFallback className="bg-black text-white">
               {sender.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -52,10 +52,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div className="flex flex-col">
           <div
             className={cn(
-              "rounded-lg py-2 px-3 glass",
+              "rounded-lg py-2 px-3",
               isCurrentUser 
-                ? "bg-care-primary/90 text-white rounded-tr-none" 
-                : "bg-white/80 text-gray-800 rounded-tl-none border border-care-border"
+                ? "bg-black text-white rounded-tr-none" 
+                : "bg-white text-gray-800 rounded-tl-none border border-gray-200"
             )}
           >
             {content}
@@ -71,7 +71,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             {isCurrentUser && (
               <span className="ml-1 flex items-center">
                 {isRead ? (
-                  <CheckCheck size={12} className="text-care-primary" />
+                  <CheckCheck size={12} className="text-blue-500" />
                 ) : (
                   <Check size={12} />
                 )}
@@ -85,7 +85,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         <div className="flex-shrink-0 ml-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={sender.avatarUrl} alt={sender.name} />
-            <AvatarFallback className="bg-care-dark text-white">
+            <AvatarFallback className="bg-black text-white">
               {sender.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>

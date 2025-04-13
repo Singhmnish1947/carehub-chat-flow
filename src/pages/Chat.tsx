@@ -12,7 +12,7 @@ const Chat = () => {
       </div>
       
       <div className="h-[calc(100vh-12rem)]">
-        <ChatLayout />
+        <ChatLayout useLocalData={true} />
       </div>
     </DashboardLayout>
   );
