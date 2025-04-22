@@ -36,6 +36,60 @@ export type Database = {
         }
         Relationships: []
       }
+      doctors: {
+        Row: {
+          availability: Json | null
+          consultation_fee: number | null
+          created_at: string | null
+          department: string | null
+          education: string | null
+          email: string | null
+          experience: number | null
+          id: string
+          image: string | null
+          name: string
+          phone: string | null
+          rating: number | null
+          specialization: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          department?: string | null
+          education?: string | null
+          email?: string | null
+          experience?: number | null
+          id?: string
+          image?: string | null
+          name: string
+          phone?: string | null
+          rating?: number | null
+          specialization?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          department?: string | null
+          education?: string | null
+          email?: string | null
+          experience?: number | null
+          id?: string
+          image?: string | null
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          specialization?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       followups: {
         Row: {
           created_at: string | null

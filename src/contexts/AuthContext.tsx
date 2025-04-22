@@ -26,10 +26,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log('Auth state changed:', event);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+
+        // If user signs in or updates, update their profile
+        if (currentSession?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentSession.user.id)
+            .single();
+
+          if (profileError && !profile) {
+            // Create profile if it doesn't exist
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: currentSession.user.id,
+                full_name: currentSession.user.user_metadata?.full_name || '',
+                role: currentSession.user.user_metadata?.role || 'patient',
+              });
+
+            if (insertError) {
+              console.error('Error creating user profile:', insertError);
+            }
+          }
+        }
       }
     );
 
@@ -68,13 +92,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         options: {
-          data: userData,
+          data: {
+            ...userData,
+            full_name: userData.full_name || '',
+            role: userData.role || 'patient',
+          },
         },
       });
       
       if (error) {
         console.error('Sign up error:', error);
         return { error, user: null };
+      }
+      
+      // Create profile after successful signup
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            full_name: userData.full_name || '',
+            role: userData.role || 'patient',
+          });
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          return { error: profileError, user: null };
+        }
       }
       
       console.log('Sign up successful:', data);
