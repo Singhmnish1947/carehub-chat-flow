@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import ChatHeader from "./ChatHeader";
 import ChatMessage from "./ChatMessage";
@@ -7,21 +6,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/hooks/use-chat";
 import { useChatLocal } from "@/hooks/use-chat-local";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 interface ChatWindowProps {
   conversationId: string;
   showBackButton?: boolean;
   onBack?: () => void;
   useLocalData?: boolean;
+  onClose?: () => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ 
   conversationId,
   showBackButton = false,
   onBack,
-  useLocalData = false
+  useLocalData = false,
+  onClose
 }) => {
-  // Choose which hook to use based on prop
   const chatHook = useLocalData ? useChatLocal() : useChat();
   
   const { 
@@ -43,7 +45,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   } : null;
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
@@ -57,7 +58,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     sendMessage(content);
   };
 
-  // Loading state
   if (!recipient) {
     return (
       <div className="flex flex-col h-full glass bg-white/80 rounded-lg shadow-md overflow-hidden border border-care-border">
@@ -86,11 +86,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   return (
     <div className="flex flex-col h-full glass bg-white/80 rounded-lg shadow-md overflow-hidden border border-gray-200">
-      <ChatHeader 
-        recipient={recipient}
-        showBackButton={showBackButton}
-        onBack={onBack}
-      />
+      <div className="flex items-center justify-between border-b border-gray-200 bg-white">
+        <ChatHeader 
+          recipient={recipient}
+          showBackButton={showBackButton}
+          onBack={onBack}
+        />
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="mr-2"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close chat</span>
+          </Button>
+        )}
+      </div>
       
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-gray-50">
         <div className="space-y-4">

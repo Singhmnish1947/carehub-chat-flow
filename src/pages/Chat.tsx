@@ -2,8 +2,16 @@
 import React from "react";
 import ChatLayout from "@/components/chat/ChatLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 
 const Chat = () => {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <DashboardLayout>
       <div className="mb-4">
@@ -12,7 +20,7 @@ const Chat = () => {
       </div>
       
       <div className="h-[calc(100vh-12rem)]">
-        <ChatLayout useLocalData={true} />
+        <ChatLayout useLocalData={false} />
       </div>
     </DashboardLayout>
   );

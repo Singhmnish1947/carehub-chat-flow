@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ChatSidebar from "./ChatSidebar";
@@ -17,7 +16,6 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ useLocalData = false }) => {
   const isMobile = useIsMobile();
   const { user } = useAuth();
   
-  // Choose which hook to use based on prop
   const chatHook = useLocalData ? useChatLocal() : useChat();
   
   const { 
@@ -33,7 +31,6 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ useLocalData = false }) => {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   useEffect(() => {
-    // If we have conversations but no active conversation, set the first one as active
     if (conversations?.length > 0 && !activeConversation) {
       setActiveConversation(conversations[0].id);
     }
@@ -62,13 +59,18 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ useLocalData = false }) => {
     }
   };
   
-  // For mobile: toggle between sidebar and chat view
   const toggleMobileSidebar = () => {
     setShowMobileSidebar(!showMobileSidebar);
   };
-  
+
+  const handleCloseChat = () => {
+    setActiveConversation(null);
+    if (isMobile) {
+      setShowMobileSidebar(true);
+    }
+  };
+
   if (isMobile) {
-    // Mobile layout
     return (
       <div className="h-full bg-white rounded-lg shadow-sm">
         {showMobileSidebar || !activeConversation ? (
@@ -96,7 +98,6 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ useLocalData = false }) => {
     );
   }
   
-  // Desktop layout
   return (
     <div className="h-full flex bg-white rounded-lg shadow-sm overflow-hidden">
       <ChatSidebar 
@@ -113,6 +114,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({ useLocalData = false }) => {
           <ChatWindow 
             conversationId={activeConversation}
             useLocalData={useLocalData}
+            onClose={handleCloseChat}
           />
         </div>
       ) : (
