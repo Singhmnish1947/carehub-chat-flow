@@ -15,6 +15,7 @@ const Register = () => {
   const navigate = useNavigate();
   const { user, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,27 +35,29 @@ const Register = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error message when user types
+    if (errorMessage) setErrorMessage(null);
   };
 
   const handleRoleChange = (value: string) => {
     setFormData((prev) => ({ ...prev, role: value }));
+    // Clear error message when user changes role
+    if (errorMessage) setErrorMessage(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Passwords do not match",
-        description: "Please ensure your passwords match.",
-        variant: "destructive",
-      });
+      setErrorMessage("Passwords do not match");
       return;
     }
 
     setIsLoading(true);
 
     try {
+      console.log("Attempting to register with:", formData.email);
       const { error, user: newUser } = await signUp(
         formData.email, 
         formData.password, 
@@ -66,21 +69,22 @@ const Register = () => {
       );
       
       if (error) {
-        throw error;
+        console.error("Registration error:", error);
+        setErrorMessage(error.message || "Registration failed. Please try again.");
+        setIsLoading(false);
+        return;
       }
       
+      console.log("Registration successful:", newUser);
       toast({
         title: "Registration Successful",
-        description: "Your account has been created successfully!",
+        description: "Your account has been created successfully! Please check your email for verification.",
       });
       
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error: any) {
-      toast({
-        title: "Registration Failed",
-        description: error.message || "An error occurred. Please try again later.",
-        variant: "destructive",
-      });
+      console.error("Unexpected registration error:", error);
+      setErrorMessage(error.message || "An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +92,8 @@ const Register = () => {
 
   const handleOAuthRegister = async (provider: string) => {
     setIsLoading(true);
+    setErrorMessage(null);
+    
     try {
       // Simulated OAuth registration
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -216,6 +222,13 @@ const Register = () => {
                   className="glass-input"
                 />
               </div>
+              
+              {errorMessage && (
+                <div className="p-3 bg-red-50 text-red-600 border border-red-200 rounded-md text-sm">
+                  {errorMessage}
+                </div>
+              )}
+              
               <Button 
                 type="submit" 
                 className="w-full glass-button bg-indigo-600 hover:bg-indigo-700 text-white"

@@ -18,6 +18,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -29,17 +30,31 @@ const Login = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error message when user types
+    if (errorMessage) setErrorMessage(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
+      // Validate inputs
+      if (!formData.email || !formData.password) {
+        setErrorMessage("Email and password are required");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Submitting login with:", formData.email);
       const { error } = await signIn(formData.email, formData.password);
       
       if (error) {
-        throw error;
+        console.error("Login error:", error);
+        setErrorMessage(error.message || "Invalid email or password. Please try again.");
+        setIsLoading(false);
+        return;
       }
       
       toast({
@@ -48,11 +63,8 @@ const Login = () => {
       });
       navigate("/dashboard");
     } catch (error: any) {
-      toast({
-        title: "Login Failed",
-        description: error.message || "Invalid email or password. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Unexpected login error:", error);
+      setErrorMessage(error.message || "An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +72,8 @@ const Login = () => {
 
   const handleOAuthLogin = async (provider: string) => {
     setIsLoading(true);
+    setErrorMessage(null);
+    
     try {
       // Simulated OAuth login
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -134,6 +148,13 @@ const Login = () => {
                   className="glass-input"
                 />
               </div>
+              
+              {errorMessage && (
+                <div className="p-3 bg-red-50 text-red-600 border border-red-200 rounded-md text-sm">
+                  {errorMessage}
+                </div>
+              )}
+              
               <Button 
                 type="submit" 
                 className="w-full glass-button bg-indigo-600 hover:bg-indigo-700 text-white"

@@ -44,20 +44,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      console.log('Attempting to sign in with:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        console.error('Sign in error:', error);
+        return { error };
+      }
+      
+      console.log('Sign in successful:', data);
+      return { error: null };
+    } catch (error) {
+      console.error('Unexpected sign in error:', error);
+      return { error };
+    }
   };
 
   const signUp = async (email: string, password: string, userData: Record<string, any>) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: userData,
-      },
-    });
-    
-    return { error, user: data?.user || null };
+    try {
+      console.log('Attempting to sign up with:', email, userData);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData,
+        },
+      });
+      
+      if (error) {
+        console.error('Sign up error:', error);
+        return { error, user: null };
+      }
+      
+      console.log('Sign up successful:', data);
+      return { error: null, user: data?.user || null };
+    } catch (error) {
+      console.error('Unexpected sign up error:', error);
+      return { error, user: null };
+    }
   };
 
   const signOut = async () => {
