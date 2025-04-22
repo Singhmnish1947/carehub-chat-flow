@@ -262,7 +262,7 @@ export const generateDummyMessages = (conversationId: string, contact: Contact):
       messages.push({
         id: uuidv4(),
         conversationId,
-        content: `I have an update on this case. ${i === 0 ? 'Can we discuss it soon?' : 'Please let me know when you're available.'}`,
+        content: `I have an update on this case. ${i === 0 ? 'Can we discuss it soon?' : 'Please let me know when you\'re available.'}`,
         sender: {
           id: contact.id,
           name: contact.name,
