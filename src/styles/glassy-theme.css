@@ -7,6 +7,7 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   border-radius: 10px;
+  transition: all 0.3s ease;
 }
 
 .glass-card {
@@ -64,6 +65,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   border-radius: 12px;
+  animation: glass-dialog-appear 0.3s ease-out forwards;
 }
 
 .glass-navbar {
@@ -77,6 +79,18 @@ body {
   background: linear-gradient(135deg, #f5f7fa 0%, #e4ecfb 100%);
   color: #333;
   min-height: 100vh;
+}
+
+/* Animations */
+@keyframes glass-dialog-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Dark mode considerations */
@@ -102,4 +116,41 @@ body {
 
 .dark .glass-button:hover {
   background: rgba(17, 24, 39, 0.4);
+}
+
+/* New styles for better visibility */
+.glass-card .card-title,
+.glass-dialog .dialog-title {
+  color: #000;
+  font-weight: 600;
+}
+
+.dark .glass-card .card-title,
+.dark .glass-dialog .dialog-title {
+  color: #fff;
+}
+
+.glass-card .card-description,
+.glass-dialog .dialog-description {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.dark .glass-card .card-description,
+.dark .glass-dialog .dialog-description {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Additional glass effects */
+.glass-toast {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+  border-radius: 8px;
+}
+
+.dark .glass-toast {
+  background: rgba(17, 24, 39, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
 }

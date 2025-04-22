@@ -91,6 +91,7 @@ const Patients = () => {
   const [filterPatientType, setFilterPatientType] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [tempPatient, setTempPatient] = useState<Partial<Patient>>({});
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   // Fetch patients from Supabase
   useEffect(() => {
@@ -128,7 +129,7 @@ const Patients = () => {
     fetchPatients();
   }, [toast]);
 
-  // Filter patients based on search query, gender, and patient type
+  // Filter patients based on search query, gender, patient type, and active tab
   const filteredPatients = patients.filter((patient) => {
     let matchesSearch = true;
     
@@ -161,8 +162,16 @@ const Patients = () => {
 
     const matchesPatientType =
       filterPatientType === "all" || patient.patient_type === filterPatientType;
+      
+    // Filter based on active tab
+    const matchesTab = 
+      activeTab === "all" || 
+      (activeTab === "OPD" && patient.patient_type === "OPD") ||
+      (activeTab === "IPD" && patient.patient_type === "IPD") ||
+      (activeTab === "Emergency" && patient.patient_type === "Emergency") ||
+      (activeTab === "recent" && patient.last_visit && new Date(patient.last_visit) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
 
-    return matchesSearch && matchesGender && matchesPatientType;
+    return matchesSearch && matchesGender && matchesPatientType && matchesTab;
   });
 
   // Get badge variant based on patient type
@@ -372,7 +381,7 @@ const Patients = () => {
           <div className="flex items-center space-x-2">
             <Button 
               onClick={handleCreatePatient}
-              className="bg-care-primary hover:bg-care-dark"
+              className="glass-button bg-black text-white hover:bg-black/80"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add New Patient
@@ -391,7 +400,7 @@ const Patients = () => {
                 <SelectTrigger className="w-[120px] rounded-r-none border-r-0">
                   <SelectValue placeholder="Search by" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="glass">
                   <SelectItem value="all">All Fields</SelectItem>
                   <SelectItem value="name">Name</SelectItem>
                   <SelectItem value="phone">Phone</SelectItem>
@@ -403,7 +412,7 @@ const Patients = () => {
                 placeholder={`Search ${searchField === 'all' ? 'patients' : 'by ' + searchField}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 rounded-l-none"
+                className="pl-10 rounded-l-none glass-input"
               />
             </div>
           </div>
@@ -413,10 +422,10 @@ const Patients = () => {
               value={filterGender}
               onValueChange={(value) => setFilterGender(value)}
             >
-              <SelectTrigger className="w-[130px]">
+              <SelectTrigger className="w-[130px] glass-input">
                 <SelectValue placeholder="Gender" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass">
                 <SelectItem value="all">All Genders</SelectItem>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
@@ -428,10 +437,10 @@ const Patients = () => {
               value={filterPatientType}
               onValueChange={(value) => setFilterPatientType(value)}
             >
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px] glass-input">
                 <SelectValue placeholder="Patient Type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass">
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="OPD">OPD</SelectItem>
                 <SelectItem value="IPD">IPD</SelectItem>
@@ -439,7 +448,7 @@ const Patients = () => {
               </SelectContent>
             </Select>
 
-            <div className="flex gap-1 bg-white border rounded-md p-1">
+            <div className="flex gap-1 bg-white/20 backdrop-blur-sm border rounded-md p-1">
               <Button
                 variant={viewMode === "table" ? "default" : "outline"}
                 size="sm"
@@ -461,13 +470,23 @@ const Patients = () => {
         </div>
         
         <div className="flex-1 p-4 overflow-auto">
-          <Tabs defaultValue="all" className="mb-6">
-            <TabsList>
-              <TabsTrigger value="all">All Patients ({patients.length})</TabsTrigger>
-              <TabsTrigger value="OPD">OPD ({patients.filter(p => p.patient_type === "OPD").length})</TabsTrigger>
-              <TabsTrigger value="IPD">IPD ({patients.filter(p => p.patient_type === "IPD").length})</TabsTrigger>
-              <TabsTrigger value="Emergency">Emergency ({patients.filter(p => p.patient_type === "Emergency").length})</TabsTrigger>
-              <TabsTrigger value="recent">Recent Visits ({patients.filter(p => p.last_visit && new Date(p.last_visit) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length})</TabsTrigger>
+          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <TabsList className="glass-card border border-white/20 p-1">
+              <TabsTrigger value="all" className="data-[state=active]:bg-black data-[state=active]:text-white">
+                All Patients ({patients.length})
+              </TabsTrigger>
+              <TabsTrigger value="OPD" className="data-[state=active]:bg-black data-[state=active]:text-white">
+                OPD ({patients.filter(p => p.patient_type === "OPD").length})
+              </TabsTrigger>
+              <TabsTrigger value="IPD" className="data-[state=active]:bg-black data-[state=active]:text-white">
+                IPD ({patients.filter(p => p.patient_type === "IPD").length})
+              </TabsTrigger>
+              <TabsTrigger value="Emergency" className="data-[state=active]:bg-black data-[state=active]:text-white">
+                Emergency ({patients.filter(p => p.patient_type === "Emergency").length})
+              </TabsTrigger>
+              <TabsTrigger value="recent" className="data-[state=active]:bg-black data-[state=active]:text-white">
+                Recent Visits ({patients.filter(p => p.last_visit && new Date(p.last_visit) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length})
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -476,7 +495,7 @@ const Patients = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
           ) : viewMode === "table" ? (
-            <Card className="w-full">
+            <Card className="w-full glass-card animate-glass-fade">
               <CardHeader className="pb-2">
                 <CardTitle>Patient List</CardTitle>
                 <CardDescription>

@@ -18,7 +18,7 @@ import Taskboard from "./pages/Taskboard";
 import Doctors from "./pages/Doctors";
 import Patients from "./pages/Patients";
 import Appointments from "./pages/Appointments";
-import Payments from "./pages/Payments";
+import Billing from "./pages/Billing";
 import Departments from "./pages/Departments";
 import Locations from "./pages/Locations";
 import Medication from "./pages/Medication";
@@ -27,6 +27,12 @@ import Staff from "./pages/Staff";
 import Inventory from "./pages/Inventory";
 import Settings from "./pages/Settings";
 import AIChatbot from "./pages/AIChatbot";
+import Xray from "./pages/Xray";
+import Pharmacy from "./pages/Pharmacy";
+import MinorOT from "./pages/MinorOT";
+import MajorOT from "./pages/MajorOT";
+import Ortho from "./pages/Ortho";
+import Gyno from "./pages/Gyno";
 import { AuthProvider } from "./contexts/AuthContext";
 
 // Create a new QueryClient instance before rendering
@@ -77,9 +83,9 @@ const App = () => {
                   <Appointments />
                 </ProtectedRoute>
               } />
-              <Route path="/payments" element={
+              <Route path="/billing" element={
                 <ProtectedRoute>
-                  <Payments />
+                  <Billing />
                 </ProtectedRoute>
               } />
               <Route path="/departments" element={
@@ -120,6 +126,36 @@ const App = () => {
               <Route path="/ai-chatbot" element={
                 <ProtectedRoute>
                   <AIChatbot />
+                </ProtectedRoute>
+              } />
+              <Route path="/xray" element={
+                <ProtectedRoute>
+                  <Xray />
+                </ProtectedRoute>
+              } />
+              <Route path="/pharmacy" element={
+                <ProtectedRoute>
+                  <Pharmacy />
+                </ProtectedRoute>
+              } />
+              <Route path="/minor-ot" element={
+                <ProtectedRoute>
+                  <MinorOT />
+                </ProtectedRoute>
+              } />
+              <Route path="/major-ot" element={
+                <ProtectedRoute>
+                  <MajorOT />
+                </ProtectedRoute>
+              } />
+              <Route path="/ortho" element={
+                <ProtectedRoute>
+                  <Ortho />
+                </ProtectedRoute>
+              } />
+              <Route path="/gyno" element={
+                <ProtectedRoute>
+                  <Gyno />
                 </ProtectedRoute>
               } />
               
