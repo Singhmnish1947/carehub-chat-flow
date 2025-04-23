@@ -3,9 +3,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { Database } from '@/integrations/supabase/types';
+
+// Define type for valid table names from the Supabase schema
+type TableName = keyof Database['public']['Tables'];
 
 export const useSupabaseOperations = <T extends unknown>(
-  table: string,
+  table: TableName,
   options?: {
     defaultData?: T[];
     filter?: object;
