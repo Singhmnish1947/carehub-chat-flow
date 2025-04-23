@@ -48,9 +48,21 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/" element={
+                <ProtectedRoute requiresAuth={false}>
+                  <Index />
+                </ProtectedRoute>
+              } />
+              <Route path="/login" element={
+                <ProtectedRoute requiresAuth={false}>
+                  <Login />
+                </ProtectedRoute>
+              } />
+              <Route path="/register" element={
+                <ProtectedRoute requiresAuth={false}>
+                  <Register />
+                </ProtectedRoute>
+              } />
               
               {/* Protected routes */}
               <Route path="/dashboard" element={
