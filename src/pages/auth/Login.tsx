@@ -23,6 +23,7 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
+      console.log("User is already logged in, redirecting to dashboard");
       navigate("/dashboard");
     }
   }, [user, navigate]);
