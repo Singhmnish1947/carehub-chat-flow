@@ -20,11 +20,11 @@ import {
   Bell,
   Plus,
   Microscope,
-  Pharmacy,
+  Clipboard,
   Scissors,
   XSquare,
   Bone,
-  Uterus
+  Heart
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -57,11 +57,11 @@ const navItems: NavItem[] = [
   { icon: UserCog, label: "Staff", href: "/staff", category: "Admin" },
   { icon: Package, label: "Inventory", href: "/inventory", category: "Admin" },
   { icon: XSquare, label: "X-Ray", href: "/xray", category: "Services" },
-  { icon: Pharmacy, label: "Pharmacy", href: "/pharmacy", category: "Services" },
+  { icon: Clipboard, label: "Pharmacy", href: "/pharmacy", category: "Services" },
   { icon: Scissors, label: "Minor OT", href: "/minor-ot", category: "Services" },
   { icon: Scissors, label: "Major OT", href: "/major-ot", category: "Services" },
   { icon: Bone, label: "Orthopedics", href: "/ortho", category: "Services" },
-  { icon: Uterus, label: "Gynecology", href: "/gyno", category: "Services" },
+  { icon: Heart, label: "Gynecology", href: "/gyno", category: "Services" },
   { icon: Bot, label: "AI Chatbot", href: "/ai-chatbot" },
   { icon: Settings, label: "Settings", href: "/settings", category: "Admin" },
 ];

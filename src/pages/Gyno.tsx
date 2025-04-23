@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Uterus, Calendar, Users, Activity, FileText, Stethoscope, Baby } from "lucide-react";
+import { Heart, Calendar, Users, Activity, FileText, Stethoscope, Baby } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Gyno = () => {
@@ -107,7 +107,7 @@ const Gyno = () => {
                 <Baby className="h-4 w-4 mr-2" /> Register Pregnancy
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => toast({ title: "Coming Soon" })}>
-                <Uterus className="h-4 w-4 mr-2" /> View Patient History
+                <Heart className="h-4 w-4 mr-2" /> View Patient History
               </Button>
             </div>
           </CardContent>
@@ -182,7 +182,7 @@ const Gyno = () => {
               <CardDescription>Manage gynecological procedures and surgeries</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Uterus className="h-16 w-16 text-gray-300 mb-4" />
+              <Heart className="h-16 w-16 text-gray-300 mb-4" />
               <h3 className="text-lg font-medium">Procedure Management Coming Soon</h3>
               <p className="text-gray-500 mt-2 max-w-md text-center">
                 The gynecological procedure management module is under development. Soon you'll be able to schedule procedures, manage pre and post-operative care, and track outcomes.
