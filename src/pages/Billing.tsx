@@ -895,3 +895,250 @@ const Billing = () => {
 
       {/* View Bill Dialog */}
       <Dialog open={viewBillId !== null} onOpenChange={() => setViewBillId(null)}>
+        <DialogContent className="glass-dialog max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Invoice #{currentBill?.invoiceNumber}</DialogTitle>
+            <DialogDescription>
+              Bill details for {currentBill?.patientName}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {currentBill && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">Patient Information</h4>
+                  <p className="font-medium">{currentBill.patientName}</p>
+                  <p className="text-sm text-gray-500">ID: {currentBill.patientId}</p>
+                </div>
+                <div className="text-right">
+                  <h4 className="text-sm font-medium text-gray-500">Bill Information</h4>
+                  <p className="font-medium">Invoice #{currentBill.invoiceNumber}</p>
+                  <p className="text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(currentBill.status)}`}>
+                      {currentBill.status}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <h4 className="font-medium text-gray-500">Issue Date</h4>
+                  <p>{formatDate(currentBill.issueDate)}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-500">Due Date</h4>
+                  <p>{formatDate(currentBill.dueDate)}</p>
+                </div>
+                <div className="md:text-right">
+                  <h4 className="font-medium text-gray-500">Amount</h4>
+                  <p className="text-xl font-bold">{formatCurrency(currentBill.amount)}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-2">Items</h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Qty</TableHead>
+                      <TableHead className="text-right">Unit Price</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentBill.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell className="text-right">{item.quantity}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.unitPrice)}</TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(item.total)}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-right font-medium">Total</TableCell>
+                      <TableCell className="text-right font-bold">{formatCurrency(currentBill.amount)}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={handlePrintBill}
+              className="w-full sm:w-auto"
+            >
+              Print
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDownloadBill}
+              className="w-full sm:w-auto"
+            >
+              <Download size={16} className="mr-2" /> Download PDF
+            </Button>
+            {currentBill?.status === "pending" && (
+              <Button
+                onClick={() => {
+                  handleMarkAsPaid(currentBill.id);
+                  setViewBillId(null);
+                }}
+                className="w-full sm:w-auto bg-black text-white hover:bg-black/80"
+              >
+                Mark as Paid
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Create Bill Dialog */}
+      <Dialog open={showCreateBillDialog} onOpenChange={setShowCreateBillDialog}>
+        <DialogContent className="glass-dialog max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Create New Bill</DialogTitle>
+            <DialogDescription>
+              Create a new bill for a patient by adding items and services.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="patientName" className="text-sm font-medium">
+                  Patient Name
+                </label>
+                <Input
+                  id="patientName"
+                  value={newBill.patientName}
+                  onChange={(e) => setNewBill({ ...newBill, patientName: e.target.value })}
+                  placeholder="Enter patient name"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-4">Add Items</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="description" className="text-sm font-medium">
+                    Description
+                  </label>
+                  <Input
+                    id="description"
+                    value={newBillItem.description}
+                    onChange={(e) => setNewBillItem({ ...newBillItem, description: e.target.value })}
+                    placeholder="Service or item"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="quantity" className="text-sm font-medium">
+                    Quantity
+                  </label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    value={newBillItem.quantity}
+                    onChange={(e) => setNewBillItem({ 
+                      ...newBillItem, 
+                      quantity: Number(e.target.value),
+                      total: Number(e.target.value) * (newBillItem.unitPrice || 0)
+                    })}
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="unitPrice" className="text-sm font-medium">
+                    Unit Price
+                  </label>
+                  <Input
+                    id="unitPrice"
+                    type="number"
+                    value={newBillItem.unitPrice}
+                    onChange={(e) => setNewBillItem({ 
+                      ...newBillItem, 
+                      unitPrice: Number(e.target.value),
+                      total: (newBillItem.quantity || 0) * Number(e.target.value)
+                    })}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+              <Button 
+                onClick={handleAddBillItem} 
+                className="mt-4 bg-black text-white hover:bg-black/80"
+              >
+                <Plus size={16} className="mr-2" /> Add Item
+              </Button>
+            </div>
+            
+            {newBill.items && newBill.items.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2">Bill Items</h4>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Qty</TableHead>
+                      <TableHead className="text-right">Unit Price</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {newBill.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell className="text-right">{item.quantity}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.unitPrice)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.total)}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleRemoveBillItem(item.id)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-right font-medium">Total</TableCell>
+                      <TableCell className="text-right font-bold">{formatCurrency(newBill.amount || 0)}</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCreateBillDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateBill}
+              className="bg-black text-white hover:bg-black/80"
+            >
+              Create Bill
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </DashboardLayout>
+  );
+};
+
+export default Billing;
