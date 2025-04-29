@@ -7,40 +7,31 @@ import { Loader2 } from 'lucide-react';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: string[];
-  requiresAuth?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  allowedRoles = [],
-  requiresAuth = true
+  allowedRoles = [] 
 }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  console.log('ProtectedRoute:', {
-    path: location.pathname,
-    user: user ? 'authenticated' : 'not authenticated',
-    loading
-  });
-
   if (loading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
       </div>
     );
   }
 
-  // For authenticated routes, redirect to login if not authenticated
-  if (!user && requiresAuth) {
-    console.log("User not authenticated, redirecting to login from", location.pathname);
+  if (!user) {
+    // Redirect to login if not authenticated
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If roles are specified and route requires authentication, check if user has required role
-  if (requiresAuth && allowedRoles.length > 0 && user) {
+  // If roles are specified, check if user has required role
+  if (allowedRoles.length > 0) {
     const userRole = user.user_metadata?.role || 'patient';
     
     if (!allowedRoles.includes(userRole)) {
