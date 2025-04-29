@@ -18,22 +18,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Public paths that don't require authentication
-  const publicPaths = ['/', '/login', '/register'];
-  const isPublicPath = publicPaths.includes(location.pathname);
+  console.log('ProtectedRoute:', {
+    path: location.pathname,
+    user: user ? 'authenticated' : 'not authenticated',
+    loading
+  });
 
   if (loading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-        <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
       </div>
     );
-  }
-
-  // Allow access to public paths without authentication
-  if (isPublicPath && !requiresAuth) {
-    return <>{children}</>;
   }
 
   // For authenticated routes, redirect to login if not authenticated

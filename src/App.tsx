@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -11,16 +12,20 @@ import Patients from '@/pages/Patients';
 import Doctors from '@/pages/Doctors';
 import Inventory from '@/pages/Inventory';
 import Settings from '@/pages/Settings';
+import NotFound from '@/pages/NotFound';
 
 const App = () => {
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          
+          {/* Root redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
           
           {/* Protected Routes */}
           <Route
@@ -71,6 +76,9 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
+          {/* Not Found Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
       </AuthProvider>
