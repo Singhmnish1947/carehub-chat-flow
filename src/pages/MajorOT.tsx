@@ -1,90 +1,27 @@
 
 import React from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scissors, Calendar, Clock, Users, Activity, Heart, AlertTriangle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
-const MajorOT = () => {
-  const { toast } = useToast();
-  
+const MajorOTPage = () => {
   return (
     <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Major Operation Theatre</h1>
-        <p className="text-gray-500">Manage complex surgical procedures and operation schedules</p>
-      </div>
-      
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <Card className="glass-card animate-glass-fade">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Scheduled Surgeries</p>
-              <h3 className="text-3xl font-bold mt-1">6</h3>
-            </div>
-            <div className="p-4 bg-blue-100 rounded-full">
-              <Scissors className="h-6 w-6 text-blue-700" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card animate-glass-fade">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Available OTs</p>
-              <h3 className="text-3xl font-bold mt-1">3/5</h3>
-            </div>
-            <div className="p-4 bg-green-100 rounded-full">
-              <Calendar className="h-6 w-6 text-green-700" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card animate-glass-fade">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Ongoing Surgeries</p>
-              <h3 className="text-3xl font-bold mt-1">2</h3>
-            </div>
-            <div className="p-4 bg-red-100 rounded-full">
-              <Heart className="h-6 w-6 text-red-700" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-card animate-glass-fade">
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Surgical Teams</p>
-              <h3 className="text-3xl font-bold mt-1">4</h3>
-            </div>
-            <div className="p-4 bg-purple-100 rounded-full">
-              <Users className="h-6 w-6 text-purple-700" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Alert Card */}
-      <Card className="glass-card animate-glass-fade mb-6 border-yellow-300">
-        <CardContent className="p-4 flex items-center gap-4">
-          <div className="rounded-full bg-yellow-100 p-3">
-            <AlertTriangle className="h-6 w-6 text-yellow-700" />
-          </div>
-          <div>
-            <h3 className="font-medium">OT #2 Requires Maintenance</h3>
-            <p className="text-sm text-gray-500">Scheduled maintenance for ventilation system - Available from 25 Apr</p>
-          </div>
-          <Button className="ml-auto" variant="outline" size="sm">View Details</Button>
-        </CardContent>
+      <Card className="bg-amber-50 border border-amber-200 flex items-center p-4 mb-6">
+        <AlertTriangle className="h-6 w-6 text-amber-500 mr-3 flex-shrink-0" />
+        <div className="flex-1">
+          <h2 className="font-medium text-amber-800">OT #2 Requires Maintenance</h2>
+          <p className="text-sm text-amber-700">Scheduled maintenance for ventilation system - Available from 25 Apr</p>
+        </div>
+        <Button variant="outline" className="bg-white border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800">
+          View Details
+        </Button>
       </Card>
       
-      {/* Tabs */}
-      <Tabs defaultValue="schedule">
-        <TabsList className="glass-card border border-white/20 p-1">
+      <Tabs defaultValue="schedule" className="w-full">
+        <TabsList className="bg-black rounded-md mb-6">
           <TabsTrigger value="schedule" className="data-[state=active]:bg-black data-[state=active]:text-white">
             OT Schedule
           </TabsTrigger>
@@ -100,95 +37,57 @@ const MajorOT = () => {
         </TabsList>
         
         <TabsContent value="schedule" className="mt-6">
-          <Card className="glass-card animate-glass-fade">
-            <CardHeader>
-              <CardTitle>Operation Theatre Schedule</CardTitle>
-              <CardDescription>Schedule and manage major surgical procedures</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Activity className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium">OT Scheduling Coming Soon</h3>
-              <p className="text-gray-500 mt-2 max-w-md text-center">
+          <Card className="p-8 bg-white shadow-sm">
+            <h2 className="text-2xl font-bold mb-2">Operation Theatre Schedule</h2>
+            <p className="text-gray-500 mb-12">Schedule and manage major surgical procedures</p>
+            
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-24 h-24 mb-6">
+                <svg viewBox="0 0 100 100" className="w-full h-full text-gray-300">
+                  <path d="M50,0 C77.6,0 100,22.4 100,50 C100,77.6 77.6,100 50,100 C22.4,100 0,77.6 0,50 C0,22.4 22.4,0 50,0 Z M50,10 C27.9,10 10,27.9 10,50 C10,72.1 27.9,90 50,90 C72.1,90 90,72.1 90,50 C90,27.9 72.1,10 50,10 Z" fill="currentColor" />
+                  <path d="M50,20 L50,50 L70,70" stroke="currentColor" strokeWidth="10" fill="none" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-medium mb-3">OT Scheduling Coming Soon</h3>
+              <p className="text-gray-600 max-w-md mx-auto mb-8">
                 The Major OT scheduling module is under development. You'll soon be able to schedule surgeries, assign operation theatres, and coordinate surgical teams.
               </p>
-              <Button
-                className="mt-6 bg-black text-white hover:bg-black/80"
-                onClick={() => toast({ title: "Coming Soon", description: "The OT scheduling module will be available soon." })}
-              >
+              <Button variant="outline" className="bg-black text-white hover:bg-gray-800">
                 Check Back Later
               </Button>
-            </CardContent>
+            </div>
           </Card>
         </TabsContent>
         
-        <TabsContent value="surgeries" className="mt-6">
-          <Card className="glass-card animate-glass-fade">
-            <CardHeader>
-              <CardTitle>Surgery Management</CardTitle>
-              <CardDescription>Manage complex surgical procedures</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Scissors className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium">Surgery Management Coming Soon</h3>
-              <p className="text-gray-500 mt-2 max-w-md text-center">
-                The surgery management module is being developed. Soon you'll be able to create surgery templates, estimate durations, track supplies needed, and manage post-operative care plans.
-              </p>
-              <Button
-                className="mt-6 bg-black text-white hover:bg-black/80"
-                onClick={() => toast({ title: "Coming Soon", description: "The surgery management module will be available soon." })}
-              >
-                Check Back Later
-              </Button>
-            </CardContent>
-          </Card>
+        <TabsContent value="surgeries">
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-sm">
+            <h3 className="text-lg font-medium mb-2">Surgeries View Coming Soon</h3>
+            <p className="text-gray-500 max-w-md">
+              The surgeries management module is under development. You'll be able to schedule and track surgical procedures.
+            </p>
+          </div>
         </TabsContent>
         
-        <TabsContent value="teams" className="mt-6">
-          <Card className="glass-card animate-glass-fade">
-            <CardHeader>
-              <CardTitle>Surgical Teams</CardTitle>
-              <CardDescription>Manage surgical teams and staff assignments</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Users className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium">Surgical Team Management Coming Soon</h3>
-              <p className="text-gray-500 mt-2 max-w-md text-center">
-                The surgical team management module is under development. You'll be able to create teams, assign staff members, manage their specialties, and track their availability.
-              </p>
-              <Button
-                className="mt-6 bg-black text-white hover:bg-black/80"
-                onClick={() => toast({ title: "Coming Soon", description: "The surgical team management module will be available soon." })}
-              >
-                Check Back Later
-              </Button>
-            </CardContent>
-          </Card>
+        <TabsContent value="teams">
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-sm">
+            <h3 className="text-lg font-medium mb-2">Surgical Teams Management Coming Soon</h3>
+            <p className="text-gray-500 max-w-md">
+              The surgical teams management module is under development. You'll be able to create and manage surgical teams.
+            </p>
+          </div>
         </TabsContent>
         
-        <TabsContent value="equipment" className="mt-6">
-          <Card className="glass-card animate-glass-fade">
-            <CardHeader>
-              <CardTitle>Surgical Equipment</CardTitle>
-              <CardDescription>Manage specialized surgical equipment and supplies</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 mb-4"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              <h3 className="text-lg font-medium">Equipment Management Coming Soon</h3>
-              <p className="text-gray-500 mt-2 max-w-md text-center">
-                The surgical equipment management module is being built. You'll be able to inventory specialized equipment, track sterilization status, and manage maintenance schedules.
-              </p>
-              <Button
-                className="mt-6 bg-black text-white hover:bg-black/80"
-                onClick={() => toast({ title: "Coming Soon", description: "The equipment management module will be available soon." })}
-              >
-                Check Back Later
-              </Button>
-            </CardContent>
-          </Card>
+        <TabsContent value="equipment">
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-sm">
+            <h3 className="text-lg font-medium mb-2">Equipment Management Coming Soon</h3>
+            <p className="text-gray-500 max-w-md">
+              The equipment management module is under development. You'll be able to track and maintain surgical equipment.
+            </p>
+          </div>
         </TabsContent>
       </Tabs>
     </DashboardLayout>
   );
 };
 
-export default MajorOT;
+export default MajorOTPage;

@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
-  MessageSquare, 
   Users, 
   Calendar, 
   CreditCard, 
@@ -19,10 +18,9 @@ import {
   Search,
   Bell,
   Plus,
-  Microscope,
+  XSquare,
   Clipboard,
   Scissors,
-  XSquare,
   Bone,
   Heart
 } from "lucide-react";
@@ -45,7 +43,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: CheckSquare, label: "Taskboard", href: "/taskboard" },
-  { icon: MessageSquare, label: "Chat", href: "/chat" },
   { icon: Users, label: "Doctors", href: "/doctors", category: "Staff" },
   { icon: Users, label: "Patients", href: "/patients", category: "Users" },
   { icon: Calendar, label: "Appointments", href: "/appointments" },
