@@ -28,6 +28,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -78,6 +86,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return acc;
   }, {});
 
+  const handleLogout = () => {
+    // Implement logout functionality
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar for desktop */}
@@ -86,10 +99,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Link to="/dashboard" className="flex items-center space-x-2">
             <img 
               src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-              alt="HavenMed Logo" 
+              alt="Bhagwati Hospital Logo" 
               className="h-8 w-8" 
             />
-            <h1 className="text-xl font-bold text-gray-900">HavenMed</h1>
+            <div className="flex flex-col">
+              <h1 className="text-sm font-bold text-gray-900">BHAGWATI HOSPITAL</h1>
+              <p className="text-xs text-gray-500">MANAGEMENT</p>
+            </div>
           </Link>
         </div>
         
@@ -128,10 +144,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <p className="font-medium text-sm text-gray-900">Jack Chain</p>
               <p className="text-xs text-gray-500 truncate">Super admin</p>
             </div>
-            <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700">
-              <Settings size={18} />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700">
+                  <Settings size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+        </div>
+        
+        <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
+          <p>Ranchi Road, Redma, Daltonganj</p>
+          <p>PIN: 822101</p>
         </div>
       </aside>
 
@@ -140,10 +173,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="flex items-center space-x-2">
           <img 
             src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-            alt="HavenMed Logo" 
+            alt="Bhagwati Hospital Logo" 
             className="h-8 w-8" 
           />
-          <h1 className="text-xl font-bold text-gray-900">HavenMed</h1>
+          <div className="flex flex-col">
+            <h1 className="text-sm font-bold text-gray-900">BHAGWATI HOSPITAL</h1>
+            <p className="text-xs text-gray-500">MANAGEMENT</p>
+          </div>
         </div>
         
         <Button 
@@ -174,10 +210,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <div className="flex items-center space-x-2">
                   <img 
                     src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-                    alt="HavenMed Logo" 
+                    alt="Bhagwati Hospital Logo" 
                     className="h-8 w-8" 
                   />
-                  <h1 className="text-xl font-bold text-gray-900">HavenMed</h1>
+                  <div className="flex flex-col">
+                    <h1 className="text-sm font-bold text-gray-900">BHAGWATI HOSPITAL</h1>
+                    <p className="text-xs text-gray-500">MANAGEMENT</p>
+                  </div>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -227,7 +266,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <p className="font-medium text-sm text-gray-900">Jack Chain</p>
                   <p className="text-xs text-gray-500 truncate">Super admin</p>
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleLogout}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <Settings size={18} />
+                </Button>
               </div>
+            </div>
+            <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
+              <p>Ranchi Road, Redma, Daltonganj</p>
+              <p>PIN: 822101</p>
             </div>
           </div>
         </div>
@@ -250,18 +301,30 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <Button variant="ghost" size="icon" className="rounded-full text-gray-700">
               <Bell size={20} />
             </Button>
-            <div className="flex items-center space-x-3">
-              <Avatar>
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-gray-700 text-white">
-                  JC
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Jack Chain</p>
-                <p className="text-xs text-gray-500">Super admin</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center space-x-3 cursor-pointer">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg" />
+                    <AvatarFallback className="bg-gray-700 text-white">
+                      JC
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Jack Chain</p>
+                    <p className="text-xs text-gray-500">Super admin</p>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <div className="p-4 md:p-6 pt-20 md:pt-24">

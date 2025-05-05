@@ -1,10 +1,12 @@
 
 import React, { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, FileEdit, Trash2, Filter } from "lucide-react";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,565 +16,469 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogClose
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
+import { Search, Plus, File, Trash2, Edit, FileEdit } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-// Doctor type definition
 interface Doctor {
   id: string;
   name: string;
-  email: string;
-  phone: string;
   specialization: string;
-  department: string;
-  experience: number;
-  education: string;
-  availability: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
+  experience: string;
+  qualification: string;
+  contact: {
+    email: string;
+    phone: string;
   };
-  consultationFee: number;
-  rating: number;
-  image?: string;
+  fee: string;
 }
 
-// Sample doctor data
 const initialDoctors: Doctor[] = [
   {
     id: "D001",
     name: "Dr. Robert Chen",
-    email: "robert.chen@havenmed.com",
-    phone: "555-111-2222",
     specialization: "Cardiology",
-    department: "Cardiology",
-    experience: 15,
-    education: "MD, Harvard Medical School",
-    availability: {
-      monday: true,
-      tuesday: true,
-      wednesday: true,
-      thursday: true,
-      friday: true,
-      saturday: false,
-      sunday: false,
+    experience: "15 years",
+    qualification: "MD, Harvard Medical School",
+    contact: {
+      email: "robert.chen@havenmed.com",
+      phone: "555-111-2222"
     },
-    consultationFee: 250,
-    rating: 4.8,
+    fee: "$250"
   },
   {
     id: "D002",
     name: "Dr. Sarah Johnson",
-    email: "sarah.johnson@havenmed.com",
-    phone: "555-222-3333",
     specialization: "Pediatrics",
-    department: "Pediatrics",
-    experience: 10,
-    education: "MD, Johns Hopkins University",
-    availability: {
-      monday: true,
-      tuesday: true,
-      wednesday: false,
-      thursday: true,
-      friday: true,
-      saturday: true,
-      sunday: false,
+    experience: "10 years",
+    qualification: "MD, Johns Hopkins University",
+    contact: {
+      email: "sarah.johnson@havenmed.com",
+      phone: "555-222-3333"
     },
-    consultationFee: 200,
-    rating: 4.9,
+    fee: "$200"
   },
   {
     id: "D003",
     name: "Dr. Michael Rodriguez",
-    email: "michael.rodriguez@havenmed.com",
-    phone: "555-333-4444",
     specialization: "Neurology",
-    department: "Neurology",
-    experience: 12,
-    education: "MD, Stanford University",
-    availability: {
-      monday: true,
-      tuesday: false,
-      wednesday: true,
-      thursday: true,
-      friday: false,
-      saturday: false,
-      sunday: false,
+    experience: "12 years",
+    qualification: "MD, Stanford University",
+    contact: {
+      email: "michael.rodriguez@havenmed.com",
+      phone: "555-333-4444"
     },
-    consultationFee: 275,
-    rating: 4.7,
-  },
+    fee: "$275"
+  }
 ];
 
-// Department options
-const departments = [
-  "Cardiology", 
-  "Neurology", 
-  "Pediatrics", 
-  "Orthopedics", 
-  "Dermatology",
-  "Ophthalmology",
-  "Psychiatry",
-  "General Medicine",
-  "Obstetrics & Gynecology",
-  "Oncology"
-];
+const doctorSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  specialization: z.string().min(1, { message: "Specialization is required" }),
+  qualification: z.string().min(1, { message: "Qualification is required" }),
+  experience: z.string().min(1, { message: "Experience is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  phone: z.string().min(1, { message: "Phone number is required" }),
+  fee: z.string().min(1, { message: "Fee is required" }),
+});
+
+type DoctorFormValues = z.infer<typeof doctorSchema>;
 
 const Doctors = () => {
   const { toast } = useToast();
   const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentDoctor, setCurrentDoctor] = useState<Doctor | null>(null);
-  const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
-  const [filterDepartment, setFilterDepartment] = useState<string>("all");
-  const [tempDoctor, setTempDoctor] = useState<Partial<Doctor>>({});
+  const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
 
-  // Helper to initialize availability
-  const initializeAvailability = () => {
-    return {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false
-    };
-  };
-
-  // Filter doctors based on search query and department
-  const filteredDoctors = doctors.filter((doctor) => {
-    const matchesSearch =
-      !searchQuery ||
-      doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doctor.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doctor.specialization.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesDepartment =
-      filterDepartment === "all" || doctor.department === filterDepartment;
-
-    return matchesSearch && matchesDepartment;
+  // React hook form
+  const form = useForm<DoctorFormValues>({
+    resolver: zodResolver(doctorSchema),
+    defaultValues: {
+      name: "",
+      specialization: "",
+      qualification: "",
+      experience: "",
+      email: "",
+      phone: "",
+      fee: "",
+    },
   });
 
-  // Handle creating a new doctor
-  const handleCreateDoctor = () => {
-    setDialogMode("create");
-    setCurrentDoctor(null);
-    setTempDoctor({
-      availability: initializeAvailability()
-    });
-    setIsDialogOpen(true);
-  };
-
-  // Handle editing an existing doctor
-  const handleEditDoctor = (doctor: Doctor) => {
-    setDialogMode("edit");
-    setCurrentDoctor(doctor);
-    setTempDoctor({ ...doctor });
-    setIsDialogOpen(true);
-  };
-
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setTempDoctor({ ...tempDoctor, [name]: value });
-  };
-
-  // Handle number input changes
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setTempDoctor({ ...tempDoctor, [name]: Number(value) });
-  };
-
-  // Handle select input changes
-  const handleSelectChange = (name: string, value: string) => {
-    setTempDoctor({ ...tempDoctor, [name]: value });
-  };
-
-  // Handle availability change
-  const handleAvailabilityChange = (day: string, checked: boolean) => {
-    if (!tempDoctor.availability) return;
-    
-    setTempDoctor({
-      ...tempDoctor,
-      availability: {
-        ...tempDoctor.availability,
-        [day]: checked
-      }
-    });
-  };
-
-  // Handle form submission
-  const handleSubmit = () => {
-    if (!tempDoctor.name || !tempDoctor.email || !tempDoctor.specialization) {
-      toast({
-        title: "Error",
-        description: "Name, email, and specialization are required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (dialogMode === "create") {
-      // Create a new doctor
-      const newDoctor: Doctor = {
-        id: `D${String(doctors.length + 1).padStart(3, "0")}`,
-        name: tempDoctor.name || "",
-        email: tempDoctor.email || "",
-        phone: tempDoctor.phone || "",
-        specialization: tempDoctor.specialization || "",
-        department: tempDoctor.department || tempDoctor.specialization || "",
-        experience: tempDoctor.experience || 0,
-        education: tempDoctor.education || "",
-        availability: tempDoctor.availability || initializeAvailability(),
-        consultationFee: tempDoctor.consultationFee || 0,
-        rating: 0,
-      };
-
-      setDoctors([...doctors, newDoctor]);
-      
-      toast({
-        title: "Success",
-        description: "Doctor profile has been created successfully.",
-      });
-    } else {
+  const handleAddOrUpdateDoctor = (values: DoctorFormValues) => {
+    if (editingDoctor) {
       // Update existing doctor
-      if (!currentDoctor) return;
-      
       const updatedDoctors = doctors.map((doctor) =>
-        doctor.id === currentDoctor.id
-          ? { ...doctor, ...tempDoctor } as Doctor
+        doctor.id === editingDoctor.id
+          ? {
+              ...doctor,
+              name: values.name,
+              specialization: values.specialization,
+              qualification: values.qualification,
+              experience: values.experience,
+              contact: {
+                email: values.email,
+                phone: values.phone,
+              },
+              fee: values.fee,
+            }
           : doctor
       );
-      
       setDoctors(updatedDoctors);
-      
       toast({
-        title: "Success",
-        description: "Doctor profile has been updated successfully.",
+        title: "Doctor updated",
+        description: `${values.name} has been updated successfully.`,
+      });
+    } else {
+      // Add new doctor
+      const newDoctor: Doctor = {
+        id: `D${String(doctors.length + 1).padStart(3, '0')}`,
+        name: values.name,
+        specialization: values.specialization,
+        qualification: values.qualification,
+        experience: values.experience,
+        contact: {
+          email: values.email,
+          phone: values.phone,
+        },
+        fee: values.fee,
+      };
+      setDoctors([...doctors, newDoctor]);
+      toast({
+        title: "Doctor added",
+        description: `${values.name} has been added successfully.`,
       });
     }
-
+    
     setIsDialogOpen(false);
+    resetForm();
   };
 
-  // Handle doctor deletion
-  const handleDeleteDoctor = (doctorId: string) => {
-    const updatedDoctors = doctors.filter((doctor) => doctor.id !== doctorId);
+  const handleEditDoctor = (doctor: Doctor) => {
+    setEditingDoctor(doctor);
+    form.reset({
+      name: doctor.name,
+      specialization: doctor.specialization,
+      qualification: doctor.qualification,
+      experience: doctor.experience,
+      email: doctor.contact.email,
+      phone: doctor.contact.phone,
+      fee: doctor.fee,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteDoctor = (id: string) => {
+    const updatedDoctors = doctors.filter((doctor) => doctor.id !== id);
     setDoctors(updatedDoctors);
-    
     toast({
-      title: "Success",
-      description: "Doctor profile has been deleted successfully.",
+      title: "Doctor removed",
+      description: "Doctor has been removed successfully.",
+      variant: "destructive",
     });
   };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  };
+
+  const resetForm = () => {
+    setEditingDoctor(null);
+    form.reset({
+      name: "",
+      specialization: "",
+      qualification: "",
+      experience: "",
+      email: "",
+      phone: "",
+      fee: "",
+    });
+  };
+
+  const filteredDoctors = doctors.filter((doctor) => {
+    // Filter by search query
+    const searchFilter = doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        doctor.specialization.toLowerCase().includes(searchQuery.toLowerCase());
+                        
+    // Filter by department if not "all"
+    const departmentFilter = selectedDepartment === "all" || doctor.specialization.toLowerCase() === selectedDepartment.toLowerCase();
+    
+    return searchFilter && departmentFilter;
+  });
+
+  // Extract unique departments for the filter
+  const departments = ["all", ...Array.from(new Set(doctors.map(doctor => doctor.specialization.toLowerCase())))];
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col">
-        <div className="border-b p-4 flex flex-col md:flex-row md:items-center justify-between bg-white gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Doctors</h1>
-            <p className="text-gray-500">Manage doctor profiles and schedules</p>
-          </div>
-          
-          <div className="flex items-center space-x-2">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Doctors</h1>
+          <p className="text-gray-500">Manage doctor profiles and schedules</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
+          <DialogTrigger asChild>
             <Button 
-              onClick={handleCreateDoctor}
-              className="bg-care-primary hover:bg-care-dark"
+              className="bg-black text-white hover:bg-black/90"
+              onClick={() => setIsDialogOpen(true)}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Doctor
+              <Plus size={18} className="mr-2" /> Add Doctor
             </Button>
-          </div>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>{editingDoctor ? "Edit Doctor" : "Add New Doctor"}</DialogTitle>
+              <DialogDescription>
+                {editingDoctor 
+                  ? "Edit doctor information in the form below."
+                  : "Fill in the details to add a new doctor to the system."}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleAddOrUpdateDoctor)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Doctor Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Dr. Full Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="specialization"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Specialization</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Cardiology" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="qualification"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Qualification</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., MD, Harvard Medical School" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="experience"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Experience</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., 10 years" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="email@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., 555-123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="fee"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Consultation Fee</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., $250" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="bg-black text-white hover:bg-black/90">
+                    {editingDoctor ? "Update Doctor" : "Add Doctor"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div className="relative w-full md:w-64">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <Input
+            placeholder="Search doctors..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
-        
-        <div className="flex flex-wrap items-center gap-4 p-4 border-b bg-white">
-          <div className="relative flex-grow max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search doctors..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Select
-              value={filterDepartment}
-              onValueChange={(value) => setFilterDepartment(value)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div className="flex-1 p-4 overflow-auto">
-          <Card className="w-full">
-            <CardHeader className="pb-2">
-              <CardTitle>Doctor List</CardTitle>
-              <CardDescription>
-                Total: {filteredDoctors.length} doctors found
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="overflow-auto">
-              <Table className="min-w-[600px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Specialization</TableHead>
-                    <TableHead>Experience</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Fee</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredDoctors.length > 0 ? (
-                    filteredDoctors.map((doctor) => (
-                      <TableRow key={doctor.id}>
-                        <TableCell className="font-medium">{doctor.id}</TableCell>
-                        <TableCell>
-                          <div className="font-medium">{doctor.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {doctor.education}
-                          </div>
-                        </TableCell>
-                        <TableCell>{doctor.specialization}</TableCell>
-                        <TableCell>{doctor.experience} years</TableCell>
-                        <TableCell>
-                          <div>{doctor.email}</div>
-                          <div className="text-xs text-gray-500">{doctor.phone}</div>
-                        </TableCell>
-                        <TableCell>${doctor.consultationFee}</TableCell>
-                        <TableCell className="text-right">
+        <Select
+          value={selectedDepartment}
+          onValueChange={(value) => setSelectedDepartment(value)}
+        >
+          <SelectTrigger className="w-full md:w-[200px]">
+            <SelectValue placeholder="All Departments" />
+          </SelectTrigger>
+          <SelectContent>
+            {departments.map((dept) => (
+              <SelectItem key={dept} value={dept}>
+                {dept === "all" ? "All Departments" : dept.charAt(0).toUpperCase() + dept.slice(1)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Doctor List */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Specialization</TableHead>
+                  <TableHead>Experience</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Fee</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredDoctors.length > 0 ? (
+                  filteredDoctors.map((doctor) => (
+                    <TableRow key={doctor.id}>
+                      <TableCell className="font-medium">{doctor.id}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{doctor.name}</p>
+                          <p className="text-xs text-gray-500">{doctor.qualification}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{doctor.specialization}</TableCell>
+                      <TableCell>{doctor.experience}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="text-xs">{doctor.contact.email}</p>
+                          <p className="text-xs">{doctor.contact.phone}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{doctor.fee}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="outline"
                             onClick={() => handleEditDoctor(doctor)}
                           >
-                            <FileEdit className="h-4 w-4" />
+                            <Edit size={16} />
                           </Button>
                           <Button
-                            variant="ghost"
                             size="sm"
+                            variant="outline"
+                            className="text-red-500 border-red-200 hover:bg-red-50"
                             onClick={() => handleDeleteDoctor(doctor.id)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 size={16} />
                           </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-6">
-                        No doctors found. Try adjusting your search.
+                        </div>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      
-      {/* Doctor form dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md md:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              {dialogMode === "create" ? "Add New Doctor" : "Edit Doctor Profile"}
-            </DialogTitle>
-            <DialogDescription>
-              {dialogMode === "create"
-                ? "Enter the doctor's information below"
-                : "Update the doctor's information"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
-                  Full Name*
-                </label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Dr. John Doe"
-                  value={tempDoctor.name || ""}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email Address*
-                </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="doctor@havenmed.com"
-                  value={tempDoctor.email || ""}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
-                  Phone Number
-                </label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  placeholder="555-123-4567"
-                  value={tempDoctor.phone || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="specialization" className="text-sm font-medium">
-                  Specialization*
-                </label>
-                <Input
-                  id="specialization"
-                  name="specialization"
-                  placeholder="Cardiology"
-                  value={tempDoctor.specialization || ""}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="department" className="text-sm font-medium">
-                  Department
-                </label>
-                <Select
-                  value={tempDoctor.department || ""}
-                  onValueChange={(value) => handleSelectChange("department", value)}
-                >
-                  <SelectTrigger id="department">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((dept) => (
-                      <SelectItem key={dept} value={dept}>
-                        {dept}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="experience" className="text-sm font-medium">
-                  Experience (Years)
-                </label>
-                <Input
-                  id="experience"
-                  name="experience"
-                  type="number"
-                  min="0"
-                  placeholder="10"
-                  value={tempDoctor.experience || ""}
-                  onChange={handleNumberChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="education" className="text-sm font-medium">
-                  Education & Qualifications
-                </label>
-                <Input
-                  id="education"
-                  name="education"
-                  placeholder="MD, Harvard Medical School"
-                  value={tempDoctor.education || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="consultationFee" className="text-sm font-medium">
-                  Consultation Fee ($)
-                </label>
-                <Input
-                  id="consultationFee"
-                  name="consultationFee"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="200"
-                  value={tempDoctor.consultationFee || ""}
-                  onChange={handleNumberChange}
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Availability
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].map((day) => (
-                  <label key={day} className="flex items-center space-x-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={tempDoctor.availability?.[day as keyof typeof tempDoctor.availability] || false}
-                      onChange={(e) => handleAvailabilityChange(day, e.target.checked)}
-                      className="rounded border-gray-300"
-                    />
-                    <span className="capitalize">{day}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      No doctors found. Please adjust your search or add a new doctor.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleSubmit}>
-              {dialogMode === "create" ? "Create Profile" : "Update Profile"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
     </DashboardLayout>
   );
 };

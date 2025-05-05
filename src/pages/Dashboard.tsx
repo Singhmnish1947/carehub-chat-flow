@@ -77,32 +77,7 @@ const Dashboard = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-gray-500">Welcome back, Dr. John Doe</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <Input 
-              placeholder="Search here" 
-              className="pl-10 w-full rounded-full bg-white border border-gray-200"
-            />
-          </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Bell size={20} />
-          </Button>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Settings size={20} />
-          </Button>
-          <div className="flex items-center gap-2">
-            <Avatar>
-              <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback className="bg-care-primary text-white">JD</AvatarFallback>
-            </Avatar>
-            <div className="hidden md:block">
-              <p className="text-sm font-medium">Jack Chain</p>
-              <p className="text-xs text-gray-500">Super admin</p>
-            </div>
-          </div>
+          <p className="text-gray-500">Welcome back, Dr. Jack Chain</p>
         </div>
       </div>
       
@@ -262,28 +237,28 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button 
-              className="w-full bg-care-primary hover:bg-care-dark justify-start"
+              className="w-full bg-black hover:bg-black/80 justify-start"
               onClick={() => handleNavigate('/appointments')}
             >
               <Plus className="mr-2 h-4 w-4" /> New Appointment
             </Button>
             <Button 
-              className="w-full bg-care-primary hover:bg-care-dark justify-start"
+              className="w-full bg-black hover:bg-black/80 justify-start"
               onClick={() => handleNavigate('/patients')}
             >
               <Plus className="mr-2 h-4 w-4" /> Register Patient
             </Button>
             <Button 
-              className="w-full bg-care-primary hover:bg-care-dark justify-start"
-              onClick={() => handleNavigate('/payments')}
+              className="w-full bg-black hover:bg-black/80 justify-start"
+              onClick={() => handleNavigate('/billing')}
             >
               <Plus className="mr-2 h-4 w-4" /> Create Invoice
             </Button>
             <Button 
-              className="w-full bg-care-primary hover:bg-care-dark justify-start"
-              onClick={() => handleNavigate('/chat')}
+              className="w-full bg-black hover:bg-black/80 justify-start"
+              onClick={() => handleNavigate('/doctors')}
             >
-              <Plus className="mr-2 h-4 w-4" /> Schedule Meeting
+              <Plus className="mr-2 h-4 w-4" /> Add Doctor
             </Button>
           </CardContent>
         </Card>

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Card,
@@ -40,8 +42,19 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 interface Payment {
   id: string;
@@ -322,6 +335,20 @@ const initialBills: Bill[] = [
   }
 ];
 
+// Form schemas
+const paymentSchema = z.object({
+  patientName: z.string().min(1, { message: "Patient name is required" }),
+  patientId: z.string().min(1, { message: "Patient ID is required" }),
+  amount: z.coerce.number().min(1, { message: "Amount must be greater than 0" }),
+  paymentMethod: z.string().min(1, { message: "Payment method is required" }),
+  departmentName: z.string().min(1, { message: "Department is required" }),
+  serviceName: z.string().min(1, { message: "Service name is required" }),
+  invoiceNumber: z.string().optional(),
+  status: z.string().default("paid"),
+});
+
+type PaymentFormValues = z.infer<typeof paymentSchema>;
+
 const Billing = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"payments" | "bills" | "analytics" | "package_billing" | "insurance">("payments");
@@ -331,17 +358,34 @@ const Billing = () => {
   const [viewBillId, setViewBillId] = useState<string | null>(null);
   const [currentBill, setCurrentBill] = useState<Bill | null>(null);
   const [showCreateBillDialog, setShowCreateBillDialog] = useState(false);
+  const [showCreatePaymentDialog, setShowCreatePaymentDialog] = useState(false);
   const [newBill, setNewBill] = useState<Partial<Bill>>({
     patientName: "",
     amount: 0,
     status: "pending",
     items: []
   });
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [newBillItem, setNewBillItem] = useState<Partial<BillItem>>({
     description: "",
     quantity: 1,
     unitPrice: 0,
     total: 0
+  });
+
+  // React hook form for payment
+  const paymentForm = useForm<PaymentFormValues>({
+    resolver: zodResolver(paymentSchema),
+    defaultValues: {
+      patientName: "",
+      patientId: "",
+      amount: 0,
+      paymentMethod: "cash",
+      departmentName: "",
+      serviceName: "",
+      invoiceNumber: `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      status: "paid",
+    },
   });
 
   const filteredPayments = payments.filter((payment) => {
@@ -550,6 +594,99 @@ const Billing = () => {
     });
   };
 
+  const handleEditPayment = (payment: Payment) => {
+    setEditingPayment(payment);
+    paymentForm.reset({
+      patientName: payment.patientName,
+      patientId: payment.patientId,
+      amount: payment.amount,
+      paymentMethod: payment.paymentMethod,
+      departmentName: payment.departmentName,
+      serviceName: payment.serviceName,
+      invoiceNumber: payment.invoiceNumber,
+      status: payment.status,
+    });
+    setShowCreatePaymentDialog(true);
+  };
+
+  const handleDeletePayment = (id: string) => {
+    setPayments(payments.filter(payment => payment.id !== id));
+    toast({
+      title: "Payment Deleted",
+      description: "The payment record has been deleted.",
+      variant: "destructive"
+    });
+  };
+
+  const handleCreatePayment = (values: PaymentFormValues) => {
+    if (editingPayment) {
+      // Update existing payment
+      const updatedPayments = payments.map(payment => 
+        payment.id === editingPayment.id 
+          ? {
+              ...payment,
+              patientName: values.patientName,
+              patientId: values.patientId,
+              amount: values.amount,
+              paymentMethod: values.paymentMethod as "credit_card" | "debit_card" | "cash" | "bank_transfer" | "insurance",
+              departmentName: values.departmentName,
+              serviceName: values.serviceName,
+              status: values.status as "paid" | "pending" | "overdue" | "cancelled" | "refunded",
+            }
+          : payment
+      );
+      setPayments(updatedPayments);
+      toast({
+        title: "Payment Updated",
+        description: `Payment record for ${values.patientName} has been updated.`,
+      });
+    } else {
+      // Create new payment
+      const newPayment: Payment = {
+        id: Date.now().toString(),
+        patientId: values.patientId,
+        patientName: values.patientName,
+        invoiceNumber: values.invoiceNumber || `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+        amount: values.amount,
+        date: new Date().toISOString(),
+        paymentMethod: values.paymentMethod as "credit_card" | "debit_card" | "cash" | "bank_transfer" | "insurance",
+        status: values.status as "paid" | "pending" | "overdue" | "cancelled" | "refunded",
+        departmentName: values.departmentName,
+        serviceName: values.serviceName,
+      };
+      
+      setPayments([...payments, newPayment]);
+      toast({
+        title: "Payment Recorded",
+        description: `Payment of ${formatCurrency(values.amount)} from ${values.patientName} has been recorded.`,
+      });
+    }
+    
+    setShowCreatePaymentDialog(false);
+    resetPaymentForm();
+  };
+
+  const handlePaymentDialogOpenChange = (open: boolean) => {
+    setShowCreatePaymentDialog(open);
+    if (!open) {
+      resetPaymentForm();
+    }
+  };
+
+  const resetPaymentForm = () => {
+    setEditingPayment(null);
+    paymentForm.reset({
+      patientName: "",
+      patientId: "",
+      amount: 0,
+      paymentMethod: "cash",
+      departmentName: "",
+      serviceName: "",
+      invoiceNumber: `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      status: "paid",
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="mb-6">
@@ -639,12 +776,183 @@ const Billing = () => {
         </div>
         <div className="flex gap-4 w-full sm:w-auto">
           {activeTab === "payments" && (
-            <Button 
-              onClick={() => toast({ title: "Coming Soon", description: "This feature will be available soon." })}
-              className="bg-black text-white hover:bg-black/80"
-            >
-              <Plus size={18} className="mr-2" /> Record Payment
-            </Button>
+            <Dialog open={showCreatePaymentDialog} onOpenChange={handlePaymentDialogOpenChange}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => setShowCreatePaymentDialog(true)}
+                  className="bg-black text-white hover:bg-black/80"
+                >
+                  <Plus size={18} className="mr-2" /> Record Payment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>{editingPayment ? "Edit Payment" : "Record New Payment"}</DialogTitle>
+                  <DialogDescription>
+                    {editingPayment 
+                      ? "Edit payment details in the form below."
+                      : "Enter the payment details to record a new payment."}
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <Form {...paymentForm}>
+                  <form onSubmit={paymentForm.handleSubmit(handleCreatePayment)} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={paymentForm.control}
+                        name="patientName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Patient Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter patient name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={paymentForm.control}
+                        name="patientId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Patient ID</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., P001" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={paymentForm.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Amount</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="Amount" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={paymentForm.control}
+                        name="paymentMethod"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Payment Method</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select payment method" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="cash">Cash</SelectItem>
+                                <SelectItem value="credit_card">Credit Card</SelectItem>
+                                <SelectItem value="debit_card">Debit Card</SelectItem>
+                                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                                <SelectItem value="insurance">Insurance</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={paymentForm.control}
+                        name="departmentName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Department</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Cardiology" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={paymentForm.control}
+                        name="serviceName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Service</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., ECG Test" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={paymentForm.control}
+                        name="invoiceNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Invoice Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Generate automatically if empty" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={paymentForm.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Status</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="paid">Paid</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="refunded">Refunded</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowCreatePaymentDialog(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" className="bg-black text-white hover:bg-black/90">
+                        {editingPayment ? "Update Payment" : "Record Payment"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           )}
           {activeTab === "bills" && (
             <Button 
@@ -706,10 +1014,25 @@ const Billing = () => {
                       </TableCell>
                       <TableCell>{payment.departmentName}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
                           <Button
                             variant="outline"
-                            size="icon"
+                            size="sm"
+                            onClick={() => handleEditPayment(payment)}
+                          >
+                            <Edit size={16} />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeletePayment(payment.id)}
+                            className="text-red-500 border-red-200 hover:bg-red-50"
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => toast({ title: "Receipt", description: "Downloading receipt..." })}
                           >
                             <Download size={16} />
@@ -771,14 +1094,14 @@ const Billing = () => {
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="outline"
-                            size="icon"
+                            size="sm"
                             onClick={() => handleViewBill(bill.id)}
                           >
                             <Eye size={16} />
                           </Button>
                           <Button
                             variant="outline"
-                            size="icon"
+                            size="sm"
                             onClick={() => handleDownloadBill()}
                           >
                             <Download size={16} />
