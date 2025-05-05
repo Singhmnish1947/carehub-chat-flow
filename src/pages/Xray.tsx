@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, FileX, Plus, Edit, Trash2, Upload, Download, Search, SquareUser } from "lucide-react";
+import { Calendar, FileX, Plus, Edit, Trash2, Upload, Download, Search, X } from "lucide-react";
+
+// Import the specific icons that were missing
+import { Eye } from "lucide-react";
 
 interface XRayRecord {
   id: string;
@@ -166,7 +170,7 @@ const XrayPage = () => {
             <h2 className="text-3xl font-bold">{records.length}</h2>
           </div>
           <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-            <XSquare size={20} />
+            <FileX size={20} />
           </div>
         </Card>
         
@@ -564,7 +568,7 @@ const XrayPage = () => {
               
               {filteredRecords.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <XSquare className="h-12 w-12 text-gray-300 mb-4" />
+                  <FileX className="h-12 w-12 text-gray-300 mb-4" />
                   <h3 className="text-xl font-medium mb-1">No X-Ray records found</h3>
                   <p className="text-gray-500 max-w-md mx-auto mb-6">
                     There are currently no X-Ray records in the system or none match your search criteria.
