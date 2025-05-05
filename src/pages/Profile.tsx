@@ -77,15 +77,18 @@ const Profile = () => {
         email: user.email || "",
       });
 
-      // Fetch avatar if exists
-      if (data.avatar_url) {
+      // Check if avatars bucket exists and if the user has an avatar
+      try {
+        // Try to get avatar from storage
         const { data: avatarData } = await supabase.storage
           .from('avatars')
-          .getPublicUrl(data.avatar_url);
+          .getPublicUrl(`${user.id}`);
           
         if (avatarData) {
           setAvatarUrl(avatarData.publicUrl);
         }
+      } catch (avatarError) {
+        console.log("Avatar might not exist yet", avatarError);
       }
     } catch (error: any) {
       toast({
@@ -138,25 +141,16 @@ const Profile = () => {
     }
 
     const file = event.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+    const filePath = `${user.id}`;
 
     setIsLoading(true);
     try {
       // Upload file to storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
-
-      // Update avatar_url in profiles table
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: filePath })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
 
       // Get public URL
       const { data } = await supabase.storage
