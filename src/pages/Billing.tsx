@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, FileEdit, Trash2, CreditCard, DollarSign, Download, Eye } from "lucide-react";
+import { Search, Plus, FileEdit, Trash2, CreditCard, DollarSign, Download, Eye, Edit } from "lucide-react";
 import {
   Table,
   TableBody,
