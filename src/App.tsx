@@ -34,132 +34,134 @@ import Ortho from "./pages/Ortho";
 import Gyno from "./pages/Gyno";
 import { AuthProvider } from "./contexts/AuthContext";
 
-// Create a new QueryClient instance before rendering
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              {/* Protected routes */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/taskboard" element={
-                <ProtectedRoute>
-                  <Taskboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/doctors" element={
-                <ProtectedRoute>
-                  <Doctors />
-                </ProtectedRoute>
-              } />
-              <Route path="/patients" element={
-                <ProtectedRoute>
-                  <Patients />
-                </ProtectedRoute>
-              } />
-              <Route path="/appointments" element={
-                <ProtectedRoute>
-                  <Appointments />
-                </ProtectedRoute>
-              } />
-              <Route path="/billing" element={
-                <ProtectedRoute>
-                  <Billing />
-                </ProtectedRoute>
-              } />
-              <Route path="/departments" element={
-                <ProtectedRoute>
-                  <Departments />
-                </ProtectedRoute>
-              } />
-              <Route path="/locations" element={
-                <ProtectedRoute>
-                  <Locations />
-                </ProtectedRoute>
-              } />
-              <Route path="/medication" element={
-                <ProtectedRoute>
-                  <Medication />
-                </ProtectedRoute>
-              } />
-              <Route path="/rooms" element={
-                <ProtectedRoute>
-                  <Rooms />
-                </ProtectedRoute>
-              } />
-              <Route path="/staff" element={
-                <ProtectedRoute>
-                  <Staff />
-                </ProtectedRoute>
-              } />
-              <Route path="/inventory" element={
-                <ProtectedRoute>
-                  <Inventory />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } />
-              <Route path="/ai-chatbot" element={
-                <ProtectedRoute>
-                  <AIChatbot />
-                </ProtectedRoute>
-              } />
-              <Route path="/xray" element={
-                <ProtectedRoute>
-                  <Xray />
-                </ProtectedRoute>
-              } />
-              <Route path="/pharmacy" element={
-                <ProtectedRoute>
-                  <Pharmacy />
-                </ProtectedRoute>
-              } />
-              <Route path="/minor-ot" element={
-                <ProtectedRoute>
-                  <MinorOT />
-                </ProtectedRoute>
-              } />
-              <Route path="/major-ot" element={
-                <ProtectedRoute>
-                  <MajorOT />
-                </ProtectedRoute>
-              } />
-              <Route path="/ortho" element={
-                <ProtectedRoute>
-                  <Ortho />
-                </ProtectedRoute>
-              } />
-              <Route path="/gyno" element={
-                <ProtectedRoute>
-                  <Gyno />
-                </ProtectedRoute>
-              } />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                
+                {/* Protected routes */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/taskboard" element={
+                  <ProtectedRoute>
+                    <Taskboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctors" element={
+                  <ProtectedRoute>
+                    <Doctors />
+                  </ProtectedRoute>
+                } />
+                <Route path="/patients" element={
+                  <ProtectedRoute>
+                    <Patients />
+                  </ProtectedRoute>
+                } />
+                <Route path="/appointments" element={
+                  <ProtectedRoute>
+                    <Appointments />
+                  </ProtectedRoute>
+                } />
+                <Route path="/billing" element={
+                  <ProtectedRoute>
+                    <Billing />
+                  </ProtectedRoute>
+                } />
+                <Route path="/departments" element={
+                  <ProtectedRoute>
+                    <Departments />
+                  </ProtectedRoute>
+                } />
+                <Route path="/locations" element={
+                  <ProtectedRoute>
+                    <Locations />
+                  </ProtectedRoute>
+                } />
+                <Route path="/medication" element={
+                  <ProtectedRoute>
+                    <Medication />
+                  </ProtectedRoute>
+                } />
+                <Route path="/rooms" element={
+                  <ProtectedRoute>
+                    <Rooms />
+                  </ProtectedRoute>
+                } />
+                <Route path="/staff" element={
+                  <ProtectedRoute>
+                    <Staff />
+                  </ProtectedRoute>
+                } />
+                <Route path="/inventory" element={
+                  <ProtectedRoute>
+                    <Inventory />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+                <Route path="/ai-chatbot" element={
+                  <ProtectedRoute>
+                    <AIChatbot />
+                  </ProtectedRoute>
+                } />
+                <Route path="/xray" element={
+                  <ProtectedRoute>
+                    <Xray />
+                  </ProtectedRoute>
+                } />
+                <Route path="/pharmacy" element={
+                  <ProtectedRoute>
+                    <Pharmacy />
+                  </ProtectedRoute>
+                } />
+                <Route path="/minor-ot" element={
+                  <ProtectedRoute>
+                    <MinorOT />
+                  </ProtectedRoute>
+                } />
+                <Route path="/major-ot" element={
+                  <ProtectedRoute>
+                    <MajorOT />
+                  </ProtectedRoute>
+                } />
+                <Route path="/ortho" element={
+                  <ProtectedRoute>
+                    <Ortho />
+                  </ProtectedRoute>
+                } />
+                <Route path="/gyno" element={
+                  <ProtectedRoute>
+                    <Gyno />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
         </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 };
 
