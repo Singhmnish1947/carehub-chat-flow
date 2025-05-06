@@ -22,11 +22,11 @@ const Index = () => {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
             <img 
-              src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-              alt="AssistMed Logo" 
-              className="h-10 w-10 mr-3" 
+              src="/lovable-uploads/64becd08-e7f2-4ba5-8a0e-028cbbf09e14.png" 
+              alt="Bhagwati Hospital Logo" 
+              className="h-10 w-auto mr-3" 
             />
-            <h1 className="text-2xl font-bold text-indigo-800 dark:text-indigo-400">AssistMed</h1>
+            <h1 className="text-2xl font-bold text-indigo-800 dark:text-indigo-400">Bhagwati Hospital</h1>
           </div>
           <nav className="hidden md:flex space-x-8 items-center">
             <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">Features</a>
@@ -62,13 +62,13 @@ const Index = () => {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
               <Link to="/register">
-                <Button size="lg" className="glass-button bg-indigo-600 hover:bg-indigo-700 text-white">
+                <Button size="lg" className="glass-button bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto">
                   Get Started
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/login">
-                <Button size="lg" variant="outline" className="glass-button">
+                <Button size="lg" variant="outline" className="glass-button w-full sm:w-auto">
                   Sign In
                 </Button>
               </Link>
@@ -142,7 +142,7 @@ const Index = () => {
         <section id="about" className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">About AssistMed</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">About Bhagwati Hospital</h2>
               <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                 Transforming healthcare management with cutting-edge technology.
               </p>
@@ -154,12 +154,12 @@ const Index = () => {
                   Our Mission
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  At AssistMed, our mission is to revolutionize healthcare management by providing intuitive, 
+                  At Bhagwati Hospital, our mission is to revolutionize healthcare management by providing intuitive, 
                   comprehensive, and secure solutions that empower healthcare providers to deliver exceptional 
                   patient care while optimizing operational efficiency.
                 </p>
                 <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Why Choose AssistMed?
+                  Why Choose Bhagwati Hospital?
                 </h3>
                 <ul className="space-y-3 text-gray-600 dark:text-gray-300">
                   <li className="flex items-start">
@@ -197,7 +197,7 @@ const Index = () => {
               <div className="glass-card p-6 rounded-lg overflow-hidden">
                 <img 
                   src="/lovable-uploads/a9450c4a-b487-46ab-9c8b-e4532fa48636.png" 
-                  alt="AssistMed Dashboard" 
+                  alt="Bhagwati Hospital Dashboard" 
                   className="w-full h-auto rounded-lg shadow-lg" 
                 />
               </div>
@@ -234,8 +234,8 @@ const Index = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Email</h3>
-                <p className="mt-2 text-gray-600 dark:text-gray-300">info@assistmed.com</p>
-                <p className="text-gray-600 dark:text-gray-300">support@assistmed.com</p>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">info@bhagwatihospital.com</p>
+                <p className="text-gray-600 dark:text-gray-300">support@bhagwatihospital.com</p>
               </div>
 
               <div className="glass-card p-6 rounded-lg text-center">
@@ -248,7 +248,7 @@ const Index = () => {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Address</h3>
                 <p className="mt-2 text-gray-600 dark:text-gray-300">
                   123, Healthcare Avenue, <br />
-                  Bangalore, Karnataka 560001, <br />
+                  Mumbai, Maharashtra 400001, <br />
                   India
                 </p>
               </div>
@@ -289,7 +289,7 @@ const Index = () => {
                     type="text"
                     id="subject"
                     className="glass-input w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-                    placeholder="Inquiry about AssistMed"
+                    placeholder="Inquiry about HMS"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -318,11 +318,11 @@ const Index = () => {
             <div>
               <div className="flex items-center">
                 <img 
-                  src="/lovable-uploads/3307970c-cd54-42a4-a45f-842a7612780c.png" 
-                  alt="AssistMed Logo" 
-                  className="h-8 w-8 mr-2" 
+                  src="/lovable-uploads/64becd08-e7f2-4ba5-8a0e-028cbbf09e14.png"
+                  alt="Bhagwati Hospital Logo" 
+                  className="h-8 w-auto mr-2" 
                 />
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">AssistMed</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Bhagwati Hospital</h3>
               </div>
               <p className="mt-4 text-gray-600 dark:text-gray-400">
                 Revolutionizing healthcare management with innovative technology solutions.
@@ -381,7 +381,7 @@ const Index = () => {
           </div>
           <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              &copy; {new Date().getFullYear()} AssistMed. All rights reserved.
+              &copy; {new Date().getFullYear()} Bhagwati Hospital. All rights reserved.
             </p>
           </div>
         </div>

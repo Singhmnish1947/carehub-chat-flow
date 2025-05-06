@@ -58,6 +58,11 @@ const App = () => {
                   <Dashboard />
                 </ProtectedRoute>
               } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
               <Route path="/taskboard" element={
                 <ProtectedRoute>
                   <Taskboard />
@@ -116,11 +121,6 @@ const App = () => {
               <Route path="/settings" element={
                 <ProtectedRoute>
                   <Settings />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
                 </ProtectedRoute>
               } />
               <Route path="/ai-chatbot" element={
